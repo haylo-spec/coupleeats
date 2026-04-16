@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CoupleEats">
+<meta name="theme-color" content="#FF6B35">
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;CoupleEats&quot;,&quot;short_name&quot;:&quot;CoupleEats&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#FFFCF9&quot;,&quot;theme_color&quot;:&quot;#FF6B35&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://img.icons8.com/fluency/96/meal.png&quot;,&quot;sizes&quot;:&quot;96x96&quot;}]}">
+<title>CoupleEats</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--p:#FF6B35;--pl:#FFF0EA;--s:#2EC4B6;--bg:#FFFCF9;--card:#fff;--txt:#1C1917;--mut:#78716C;--bdr:#F0EBE5;--r:16px;--sh:0 2px 16px rgba(0,0,0,.07);--green:#16a34a;--red:#dc2626}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;-webkit-user-select:none;user-select:none}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--bdr);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;gap:3px;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:9px;color:var(--mut);cursor:pointer;transition:color .2s}
+.nb.on{color:var(--p)}
+.nb svg{width:20px;height:20px}
+
+/* TOP */
+.top{position:fixed;top:0;left:0;right:0;background:var(--bg);z-index:99;padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bdr)}
+.top-title{font-family:'Playfair Display',serif;font-size:20px}
+.top-date{font-size:11px;color:var(--mut);margin-top:1px}
+
+/* PAGES */
+.pg{display:none;padding:76px 16px 88px;min-height:100vh}
+.pg.on{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:12px}
+
+/* ═══ TINDER SWIPE ═══════════════════════════════════════ */
+.swipe-area{position:relative;height:480px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow:hidden}
+.swipe-card{position:absolute;width:calc(100% - 0px);max-width:360px;background:var(--card);border-radius:22px;box-shadow:0 8px 32px rgba(0,0,0,.14);cursor:grab;transition:box-shadow .2s;overflow:hidden;touch-action:none}
+.swipe-card.dragging{cursor:grabbing;transition:none}
+.swipe-card.animate-out-right{animation:swipeRight .35s ease forwards}
+.swipe-card.animate-out-left{animation:swipeLeft .35s ease forwards}
+.swipe-card.animate-back{animation:swipeBack .3s ease forwards}
+@keyframes swipeRight{to{transform:translateX(120%) rotate(20deg);opacity:0}}
+@keyframes swipeLeft{to{transform:translateX(-120%) rotate(-20deg);opacity:0}}
+@keyframes swipeBack{from{transform:var(--drag-transform)}to{transform:translateX(0) rotate(0deg)}}
+.swipe-img{width:100%;height:200px;object-fit:cover;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:64px;flex-shrink:0}
+.swipe-img img{width:100%;height:200px;object-fit:cover;display:block}
+.swipe-overlay-yes{position:absolute;top:20px;left:20px;border:4px solid #16a34a;color:#16a34a;border-radius:8px;padding:4px 12px;font-size:20px;font-weight:700;opacity:0;transform:rotate(-15deg);transition:opacity .1s;letter-spacing:1px}
+.swipe-overlay-no{position:absolute;top:20px;right:20px;border:4px solid #dc2626;color:#dc2626;border-radius:8px;padding:4px 12px;font-size:20px;font-weight:700;opacity:0;transform:rotate(15deg);transition:opacity .1s;letter-spacing:1px}
+.swipe-body{padding:14px 16px 16px}
+.swipe-slot{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--p);margin-bottom:3px}
+.swipe-name{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px}
+.swipe-meta{font-size:12px;color:var(--mut);margin-bottom:10px}
+.swipe-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
+.sm{background:var(--bg);border-radius:10px;padding:6px 2px;text-align:center}
+.sm .v{font-size:13px;font-weight:600}
+.sm .l{font-size:9px;color:var(--mut)}
+.swipe-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.badge{font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px}
+.bc{background:#FEF9C3;color:#854D0E}.bp{background:#DCFCE7;color:#166534}.bv{background:#DBEAFE;color:#1E40AF}.bf{background:#FCE7F3;color:#9D174D}
+.vbadge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.vbadge.veg{background:#DCFCE7;color:#166534}.vbadge.non{background:#FEE2E2;color:#dc2626}
+
+/* Swipe buttons */
+.swipe-btns{display:flex;justify-content:center;gap:20px;margin-top:4px}
+.swipe-btn{width:56px;height:56px;border-radius:50%;border:none;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.12);transition:transform .15s}
+.swipe-btn:active{transform:scale(.9)}
+.swipe-btn-no{background:#fff;color:var(--red)}
+.swipe-btn-yes{background:var(--p);color:#fff}
+.swipe-btn-recipe{background:#fff;color:var(--mut);width:40px;height:40px;font-size:18px}
+.swipe-slot-pills{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.swipe-slot-pills::-webkit-scrollbar{display:none}
+.slot-pill{padding:6px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--mut);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.slot-pill.on{background:var(--p);color:#fff;border-color:var(--p)}
+
+/* Match animation */
+.match-bang{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);animation:fadein .2s}
+.match-bang.on{display:flex}
+.match-box{background:#fff;border-radius:24px;padding:32px 28px;text-align:center;animation:pop .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.match-emoji{font-size:56px;margin-bottom:8px}
+.match-title{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:6px;color:var(--p)}
+.match-sub{font-size:14px;color:var(--mut);margin-bottom:20px}
+.match-dish{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px}
+
+/* ═══ TODAY MEALS ══════════════════════════════════════ */
+.mc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:12px;overflow:hidden}
+.mc-img{width:100%;height:130px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:48px;position:relative}
+.mc-img img{width:100%;height:130px;object-fit:cover;display:block}
+.mc-tags{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.mc-cui{background:rgba(255,255,255,.92);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;color:var(--mut)}
+.mc-body{padding:11px 14px 13px}
+.mc-slot{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--p);margin-bottom:2px}
+.mc-name{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px}
+.mc-meta{font-size:11px;color:var(--mut);margin-bottom:8px}
+.macros{display:flex;gap:5px;margin-bottom:9px}
+.mc2{flex:1;background:var(--bg);border-radius:8px;padding:5px 2px;text-align:center}
+.mc2 .v{font-size:12px;font-weight:600}.mc2 .l{font-size:9px;color:var(--mut)}
+.mc-actions{display:flex;gap:6px;align-items:center}
+.stars{display:flex;gap:2px}
+.star{font-size:20px;cursor:pointer;color:#E5E7EB;transition:transform .1s}
+.star.on{color:#F59E0B}
+.star:active{transform:scale(1.3)}
+.btn{padding:7px 14px;border-radius:30px;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:transform .15s}
+.btn-p{background:var(--p);color:#fff}.btn-p:active{transform:scale(.96)}
+.btn-g{background:var(--bg);color:var(--mut);border:1px solid var(--bdr)}.btn-g:active{transform:scale(.96)}
+.btn-s{padding:5px 11px;font-size:11px}
+.btn-recipe{background:var(--pl);color:var(--p);padding:5px 11px;border-radius:30px;border:none;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer}
+.notif{background:linear-gradient(90deg,#FFF7ED,#FFF0E6);border:1px solid #FED7AA;border-radius:14px;padding:11px 13px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.notif .ico{font-size:20px}
+.notif .ttl{font-size:13px;font-weight:600;color:#9A3412}
+.notif .sub{font-size:11px;color:#C2410C;margin-top:1px}
+
+/* ═══ RECIPE BOOK ════════════════════════════════════ */
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.fchip{padding:6px 13px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--mut);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.fchip.on{background:var(--p);color:#fff;border-color:var(--p)}
+.rb-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden;display:flex;align-items:center;cursor:pointer}
+.rb-emoji{width:58px;height:58px;display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--pl);flex-shrink:0}
+.rb-info{flex:1;padding:9px 11px}
+.rb-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.rb-meta{font-size:11px;color:var(--mut)}
+.rb-right{padding:0 12px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.rb-cal{font-size:13px;font-weight:700;color:var(--p)}
+.rv{width:18px;height:18px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700}
+.rv.veg{border-color:#16a34a;color:#16a34a}.rv.non{border-color:#dc2626;color:#dc2626}
+.custom-badge{background:#EDE9FE;color:#7C3AED;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600}
+
+/* ═══ FRUITS ══════════════════════════════════════ */
+.fruit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.fruit-card{background:var(--card);border-radius:14px;padding:11px 6px;box-shadow:var(--sh);text-align:center;cursor:pointer}
+.fruit-card .fe{font-size:28px;margin-bottom:4px}
+.fruit-card .fn{font-size:11px;font-weight:600;margin-bottom:2px}
+.fruit-card .fm{font-size:10px;color:var(--mut)}
+.fruit-card.season{border:2px solid var(--p)}
+.fruit-card .fs{font-size:9px;color:var(--p);font-weight:600;margin-top:3px}
+.month-banner{background:linear-gradient(90deg,var(--p),#FF8C5A);color:#fff;border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px}
+.month-banner strong{font-size:15px;display:block;margin-bottom:2px}
+
+/* ═══ NUTRITION ══════════════════════════════════════ */
+.nut-hero{background:linear-gradient(135deg,var(--p),#FF8C5A);border-radius:var(--r);padding:18px;margin-bottom:14px;color:#fff}
+.nut-hero h2{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:12px}
+.nut-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.nut-b{background:rgba(255,255,255,.2);border-radius:11px;padding:8px;text-align:center}
+.nut-b .v{font-size:16px;font-weight:600}.nut-b .l{font-size:9px;opacity:.85}
+.prog-row{margin-bottom:9px}
+.prog-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+.prog-bar{height:7px;background:var(--bdr);border-radius:10px;overflow:hidden}
+.prog-fill{height:100%;border-radius:10px;transition:width .6s ease}
+.grp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px}
+.grp-card{background:var(--card);border-radius:13px;padding:13px;box-shadow:var(--sh);text-align:center}
+.grp-card .e{font-size:26px;margin-bottom:4px}
+.grp-card .n{font-size:12px;font-weight:600}
+.grp-card .s{font-size:11px;margin-top:3px}
+.grp-card.ok .s{color:#16a34a}.grp-card.ms .s{color:#dc2626}
+
+/* ═══ CUSTOM DISH ══════════════════════════════════════ */
+.form-label{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block}
+.form-input{width:100%;border:1.5px solid var(--bdr);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--card);color:var(--txt);outline:none;margin-bottom:12px}
+.form-input:focus{border-color:var(--p)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.photo-upload{border:2px dashed var(--bdr);border-radius:14px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px;transition:border-color .2s}
+.photo-upload:hover{border-color:var(--p)}
+.photo-upload .ico{font-size:32px;margin-bottom:6px}
+.photo-upload p{font-size:13px;color:var(--mut)}
+.photo-preview{width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:12px;display:none}
+
+/* ═══ CHAT ══════════════════════════════════════ */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 170px)}
+.chat-msgs{flex:1;overflow-y:auto;padding:4px 0 12px;display:flex;flex-direction:column;gap:10px}
+.bub{max-width:84%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5}
+.bub-u{background:var(--p);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.bub-a{background:var(--card);color:var(--txt);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:var(--sh)}
+.cin-row{display:flex;gap:8px;padding:8px 0 4px}
+.cin{flex:1;border:1.5px solid var(--bdr);border-radius:24px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--card);color:var(--txt);outline:none}
+.cin:focus{border-color:var(--p)}
+.csend{width:42px;height:42px;border-radius:50%;background:var(--p);border:none;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.chip-row{display:flex;gap:6px;overflow-x:auto;padding:4px 0;scrollbar-width:none}
+.chip-row::-webkit-scrollbar{display:none}
+.chip{font-size:12px;padding:6px 12px;border-radius:20px;background:var(--pl);color:var(--p);border:none;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.typing{display:flex;gap:4px;align-items:center}
+.typing span{width:7px;height:7px;background:var(--mut);border-radius:50%;animation:bnc .9s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bnc{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+/* ═══ SETTINGS ══════════════════════════════════════ */
+.sec-h{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.7px;margin:16px 0 9px}
+.tag-cloud{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.tag{font-size:12px;padding:5px 12px;border-radius:20px;background:var(--bg);border:1px solid var(--bdr);color:var(--mut);cursor:pointer}
+.tag.no{background:#FEE2E2;border-color:#FCA5A5;color:#DC2626}
+.pref-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bdr)}
+.pref-row:last-child{border:none}
+.pref-lbl{font-size:14px;font-weight:500}
+.pref-sub{font-size:11px;color:var(--mut);margin-top:2px}
+input[type=time]{border:1px solid var(--bdr);border-radius:8px;padding:4px 8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--card);color:var(--txt)}
+
+/* ═══ RECIPE MODAL ══════════════════════════════════ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end}
+.modal-bg.on{display:flex;animation:mfi .2s ease}
+@keyframes mfi{from{opacity:0}to{opacity:1}}
+.modal{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-height:88vh;overflow-y:auto;padding:20px 20px 40px}
+.modal-handle{width:40px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-family:'Playfair Display',serif;font-size:21px;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--mut);margin-bottom:14px}
+.recipe-section{margin-bottom:16px}
+.recipe-section h4{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);margin-bottom:8px}
+.ing-list{display:flex;flex-direction:column;gap:6px}
+.ing-item{display:flex;align-items:center;gap:10px;font-size:14px;padding:8px 12px;background:var(--bg);border-radius:10px}
+.ing-item .qty{font-weight:600;color:var(--p);min-width:60px;font-size:12px}
+.step-list{display:flex;flex-direction:column;gap:10px}
+.step-item{display:flex;gap:11px;align-items:flex-start}
+.step-num{min-width:26px;height:26px;border-radius:50%;background:var(--p);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-text{font-size:14px;line-height:1.6;padding-top:3px}
+.close-btn{width:100%;margin-top:16px;padding:14px;background:var(--p);color:#fff;border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer}
+
+/* ═══ INSTALL BANNER ════════════════════════════════ */
+.install-banner{background:linear-gradient(90deg,#EDE9FE,#F0FAFA);border:1px solid #C4B5FD;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.install-banner .ico{font-size:22px}
+.install-banner .ttl{font-size:13px;font-weight:600;color:#5B21B6}
+.install-banner .sub{font-size:11px;color:#7C3AED}
+.install-btn{margin-left:auto;padding:6px 14px;background:#7C3AED;color:#fff;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
+
+/* TOAST */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(10px);background:#1C1917;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;transition:all .3s;z-index:400;white-space:nowrap;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div>
+    <div class="top-title">CoupleEats 🍽️</div>
+    <div class="top-date" id="tdate"></div>
+  </div>
+  <button class="btn btn-g btn-s" onclick="showPg('swipe',document.querySelector('.nb:nth-child(2)'))">💘 Swipe</button>
+</div>
+
+<!-- ═══ TODAY ═══ -->
+<div id="pg-home" class="pg on">
+  <div id="install-area"></div>
+  <div id="notif-area"></div>
+  <div id="meals-area"></div>
+</div>
+
+<!-- ═══ SWIPE ═══ -->
+<div id="pg-swipe" class="pg">
+  <div class="swipe-slot-pills" id="swipe-slot-pills"></div>
+  <div class="swipe-area" id="swipe-area">
+    <div class="swipe-card" id="swipe-card">
+      <div class="swipe-img" id="swipe-img"><span id="swipe-emoji">🍽️</span></div>
+      <div class="swipe-overlay-yes" id="ol-yes">YUM ✓</div>
+      <div class="swipe-overlay-no" id="ol-no">NOPE ✗</div>
+      <div class="swipe-body">
+        <div class="swipe-slot" id="sw-slot"></div>
+        <div class="swipe-name" id="sw-name"></div>
+        <div class="swipe-meta" id="sw-meta"></div>
+        <div class="swipe-badges" id="sw-badges"></div>
+        <div class="swipe-macros" id="sw-macros"></div>
+      </div>
+    </div>
+  </div>
+  <div class="swipe-btns">
+    <button class="swipe-btn swipe-btn-no" onclick="doSwipe('left')" title="Nope">✕</button>
+    <button class="swipe-btn swipe-btn-recipe" onclick="showRecipe(currentSwipeDish&&currentSwipeDish.id)" title="Recipe">📖</button>
+    <button class="swipe-btn swipe-btn-yes" onclick="doSwipe('right')" title="Yum!">♥</button>
+  </div>
+  <p style="text-align:center;font-size:12px;color:var(--mut);margin-top:12px">Drag the card or tap ✕ / ♥</p>
+</div>
+
+<!-- ═══ RECIPES ═══ -->
+<div id="pg-book" class="pg">
+  <div class="filter-row" id="book-filters"></div>
+  <div id="book-list"></div>
+</div>
+
+<!-- ═══ FRUITS ═══ -->
+<div id="pg-fruit" class="pg">
+  <div class="month-banner" id="month-banner"></div>
+  <div class="sec-h">This month ★</div>
+  <div class="fruit-grid" id="seasonal-grid"></div>
+  <div class="sec-h">All fruits A–Z</div>
+  <div class="fruit-grid" id="all-fruits-grid"></div>
+</div>
+
+<!-- ═══ NUTRITION ═══ -->
+<div id="pg-nut" class="pg">
+  <div class="nut-hero"><h2>Today's nutrition</h2><div class="nut-g" id="nut-tots"></div></div>
+  <div id="progs"></div>
+  <div class="sec-h">Food groups</div>
+  <div class="grp-grid" id="grp-grid"></div>
+  <div class="sec-h">By meal</div>
+  <div id="meal-bk"></div>
+</div>
+
+<!-- ═══ ADD DISH ═══ -->
+<div id="pg-add" class="pg">
+  <div class="card">
+    <p style="font-size:14px;font-weight:600;margin-bottom:14px">🍳 Add your own dish</p>
+    <label class="form-label">Dish name *</label>
+    <input class="form-input" id="cd-name" placeholder="e.g. Amma's Chicken Curry">
+    <label class="form-label">Cuisine</label>
+    <select class="form-input" id="cd-cui">
+      <option>South Indian</option><option>Indian</option><option>Mexican</option>
+      <option>Chinese</option><option>Italian</option><option>Continental</option>
+      <option>Mediterranean</option><option>Home Recipe</option>
+    </select>
+    <label class="form-label">Meal slot *</label>
+    <select class="form-input" id="cd-slot">
+      <option value="breakfast">Breakfast</option><option value="lunch">Lunch</option>
+      <option value="snack">Snack</option><option value="dinner">Dinner</option>
+    </select>
+    <label class="form-label">Type</label>
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+        <input type="radio" name="cd-veg" value="veg" checked> 🌱 Vegetarian
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+        <input type="radio" name="cd-veg" value="non"> 🍖 Non-veg
+      </label>
+    </div>
+    <label class="form-label">Nutrition (per serving for 2)</label>
+    <div class="form-grid">
+      <div><label class="form-label" style="font-size:10px">Calories (kcal)</label><input class="form-input" id="cd-cal" type="number" placeholder="400" style="margin-bottom:0"></div>
+      <div><label class="form-label" style="font-size:10px">Protein (g)</label><input class="form-input" id="cd-pro" type="number" placeholder="20" style="margin-bottom:0"></div>
+    </div>
+    <div class="form-grid" style="margin-top:10px">
+      <div><label class="form-label" style="font-size:10px">Carbs (g)</label><input class="form-input" id="cd-crb" type="number" placeholder="50" style="margin-bottom:0"></div>
+      <div><label class="form-label" style="font-size:10px">Fat (g)</label><input class="form-input" id="cd-fat" type="number" placeholder="12" style="margin-bottom:0"></div>
+    </div>
+    <div class="form-grid" style="margin-top:10px;margin-bottom:12px">
+      <div><label class="form-label" style="font-size:10px">Fibre (g)</label><input class="form-input" id="cd-fib" type="number" placeholder="4" style="margin-bottom:0"></div>
+      <div><label class="form-label" style="font-size:10px">Prep time (min)</label><input class="form-input" id="cd-prep" type="number" placeholder="30" style="margin-bottom:0"></div>
+    </div>
+    <label class="form-label">Ingredients (one per line)</label>
+    <textarea class="form-input" id="cd-ing" rows="4" placeholder="2 cups rice&#10;1 onion&#10;3 tbsp oil"></textarea>
+    <label class="form-label">Steps / Recipe (optional)</label>
+    <textarea class="form-input" id="cd-steps" rows="5" placeholder="1. Heat oil...&#10;2. Add onion..."></textarea>
+    <label class="form-label">Photo (optional)</label>
+    <div class="photo-upload" onclick="document.getElementById('cd-photo').click()">
+      <div class="ico">📷</div>
+      <p>Tap to add a photo of your dish</p>
+    </div>
+    <img class="photo-preview" id="cd-preview" alt="preview">
+    <input type="file" id="cd-photo" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+    <button class="btn btn-p" style="width:100%;padding:14px;font-size:15px" onclick="saveCustomDish()">✓ Save dish</button>
+  </div>
+</div>
+
+<!-- ═══ CHAT ═══ -->
+<div id="pg-chat" class="pg">
+  <div class="chat-wrap">
+    <div class="chat-msgs" id="chat-msgs"></div>
+    <div class="chip-row" id="chips"></div>
+    <div class="cin-row">
+      <input class="cin" id="cin" placeholder="Ask me anything...">
+      <button class="csend" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS ═══ -->
+<div id="pg-set" class="pg">
+  <div class="sec-h">Dislikes &amp; allergies</div>
+  <div class="card">
+    <p style="font-size:12px;color:var(--mut);margin-bottom:10px">Tap to toggle — red means we avoid it</p>
+    <div class="tag-cloud" id="dis-tags"></div>
+    <div style="display:flex;gap:8px">
+      <input id="new-dis" class="cin" placeholder="Add ingredient..." style="height:38px;font-size:13px">
+      <button class="btn btn-p btn-s" onclick="addDislike()">Add</button>
+    </div>
+  </div>
+  <div class="sec-h">Meal times</div>
+  <div class="card">
+    <div class="pref-row"><div class="pref-lbl">🌅 Breakfast</div><input type="time" id="t-bf" value="08:00"></div>
+    <div class="pref-row"><div class="pref-lbl">☀️ Lunch</div><input type="time" id="t-lu" value="12:30"></div>
+    <div class="pref-row"><div class="pref-lbl">🍎 Snack</div><input type="time" id="t-sn" value="16:00"></div>
+    <div class="pref-row"><div class="pref-lbl">🌙 Dinner</div><input type="time" id="t-di" value="19:30"></div>
+  </div>
+  <div class="sec-h">📸 Dish images — Pexels (free forever)</div>
+  <div class="card">
+    <div class="pref-row" style="border:none;padding-bottom:0">
+      <div><div class="pref-lbl">How to get your free Pexels key</div>
+      <div class="pref-sub" style="line-height:1.7;margin-top:4px">1. Go to <b>pexels.com/api</b><br>2. Click <b>Get Started</b> → sign up free<br>3. Your API key is shown on the dashboard → copy → paste below<br>Free forever, no daily limit.</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <input id="pexels-key" class="cin" type="password" placeholder="Pexels API key..." style="height:38px;font-size:13px">
+      <button class="btn btn-p btn-s" onclick="savePexels()">Save</button>
+    </div>
+  </div>
+  <div class="sec-h">🤖 AI Chat — Google Gemini (free)</div>
+  <div class="card">
+    <div class="pref-row" style="border:none;padding-bottom:0">
+      <div><div class="pref-lbl">How to get your free key</div>
+      <div class="pref-sub" style="line-height:1.7;margin-top:4px">1. Go to <b>aistudio.google.com</b><br>2. Sign in with Google → click <b>Get API key</b><br>3. Click <b>Create API key</b> → copy → paste below</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <input id="gemini-key" class="cin" type="password" placeholder="AIza..." style="height:38px;font-size:13px">
+      <button class="btn btn-p btn-s" onclick="saveGemini()">Save</button>
+    </div>
+    <p style="font-size:11px;color:var(--mut);margin-top:8px">100% free. 1500 requests/day. Stored only on this device.</p>
+  </div>
+  <div class="sec-h">📲 Install as app on your phone</div>
+  <div class="card">
+    <div class="pref-row" style="border:none;padding-bottom:0">
+      <div>
+        <div class="pref-lbl">Android — Install from Chrome</div>
+        <div class="pref-sub" style="line-height:1.7;margin-top:4px">1. Open this file in Chrome<br>2. Tap the 3-dot menu → <b>Add to Home screen</b><br>3. Done — it opens like a real app!</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bdr)">
+      <div class="pref-lbl">Turn into APK — WebIntoApp</div>
+      <div class="pref-sub" style="line-height:1.7;margin-top:4px">1. Host this file on GitHub Pages (free)<br>2. Go to <b>webintoapp.com</b><br>3. Paste the URL → Download APK → Install on phone</div>
+    </div>
+  </div>
+  <div class="sec-h">About</div>
+  <div class="card">
+    <p style="font-size:13px;color:var(--mut);line-height:1.7">CoupleEats v3 · <span id="dish-count"></span> dishes including your custom ones · Free forever · Built with love 🧡</p>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nb on" onclick="showPg('home',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Today
+  </button>
+  <button class="nb" onclick="showPg('swipe',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Swipe
+  </button>
+  <button class="nb" onclick="showPg('book',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>Recipes
+  </button>
+  <button class="nb" onclick="showPg('fruit',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Fruits
+  </button>
+  <button class="nb" onclick="showPg('nut',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Nutrition
+  </button>
+  <button class="nb" onclick="showPg('add',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add Dish
+  </button>
+  <button class="nb" onclick="showPg('chat',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chat
+  </button>
+  <button class="nb" onclick="showPg('set',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings
+  </button>
+</nav>
+
+<!-- RECIPE MODAL -->
+<div class="modal-bg" id="modal" onclick="closeModal(event)">
+  <div class="modal"><div class="modal-handle"></div><div id="modal-body"></div><button class="close-btn" onclick="closeModal()">Close</button></div>
+</div>
+
+<!-- MATCH BANG -->
+<div class="match-bang" id="match-bang">
+  <div class="match-box">
+    <div class="match-emoji">💘</div>
+    <div class="match-title">It's a match!</div>
+    <div class="match-sub">You both chose</div>
+    <div class="match-dish" id="match-dish-name"></div>
+    <button class="btn btn-p" style="width:100%" onclick="closeMatch()">Let's cook it! 🍳</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATABASE
+// ═══════════════════════════════════════════════════
+const DB=[
+{id:1,name:'Idli with Sambar',e:'🫓',slot:'breakfast',cui:'South Indian',veg:true,grp:'carbs',cal:220,pro:8,crb:42,fat:2,fib:4,tags:['carbs','protein'],prep:20,ing:[{q:'8 pcs',n:'Idli (steamed)'},{q:'2 cups',n:'Toor dal sambar'},{q:'4 tbsp',n:'Coconut chutney'}],steps:['Steam idli batter in moulds 12–15 mins until firm.','Cook toor dal, add tamarind water, tomatoes, sambar powder. Simmer 10 mins.','Temper mustard seeds, curry leaves in oil. Pour into sambar.','Blend coconut, chilli, ginger for chutney. Temper with mustard.','Serve hot with sambar and chutney.']},
+{id:2,name:'Masala Dosa',e:'🫔',slot:'breakfast',cui:'South Indian',veg:true,grp:'carbs',cal:280,pro:6,crb:48,fat:7,fib:3,tags:['carbs','veggie'],prep:25,ing:[{q:'4',n:'Dosa (fermented batter)'},{q:'3',n:'Potatoes, boiled'},{q:'1',n:'Onion, sliced'},{q:'1 tsp',n:'Mustard seeds'},{q:'1/2 tsp',n:'Turmeric'}],steps:['Boil and mash potatoes. Sauté onion with mustard, curry leaves, turmeric. Mix potatoes. Season.','Heat flat pan. Pour batter, spread thin. Drizzle oil around edges.','Cook till crisp. Place potato masala in centre. Fold.','Serve with sambar and coconut chutney.']},
+{id:3,name:'Oats & Banana Bowl',e:'🥣',slot:'breakfast',cui:'Continental',veg:true,grp:'carbs',cal:310,pro:9,crb:54,fat:6,fib:7,tags:['carbs','fruit'],prep:10,ing:[{q:'1 cup',n:'Rolled oats'},{q:'2 cups',n:'Milk'},{q:'2',n:'Bananas, sliced'},{q:'2 tbsp',n:'Mixed nuts'},{q:'1 tbsp',n:'Honey'}],steps:['Bring milk to boil. Add oats, cook 5 mins stirring.','Add cinnamon and sweetener.','Top with banana, nuts, honey. Serve warm.']},
+{id:4,name:'Egg Bhurji & Toast',e:'🍳',slot:'breakfast',cui:'Indian',veg:false,grp:'protein',cal:340,pro:18,crb:28,fat:14,fib:2,tags:['protein','carbs'],prep:15,ing:[{q:'4',n:'Eggs'},{q:'1',n:'Onion, chopped'},{q:'2',n:'Tomatoes, chopped'},{q:'4 slices',n:'Bread'},{q:'2 tbsp',n:'Butter'}],steps:['Heat butter. Sauté onion till golden. Add tomatoes, turmeric, salt.','Beat eggs. Pour over masala. Scramble on medium heat till just set.','Toast bread golden. Serve egg bhurji hot on toast.']},
+{id:5,name:'Upma',e:'🍚',slot:'breakfast',cui:'South Indian',veg:true,grp:'carbs',cal:240,pro:6,crb:40,fat:6,fib:3,tags:['carbs','veggie'],prep:20,ing:[{q:'1 cup',n:'Semolina (rava)'},{q:'2.5 cups',n:'Water'},{q:'1',n:'Onion'},{q:'1 tsp',n:'Mustard seeds'},{q:'Few',n:'Curry leaves'}],steps:['Dry roast semolina until lightly golden. Set aside.','Splutter mustard, curry leaves. Sauté onion and tomato.','Add boiling water and salt. Pour semolina slowly while stirring.','Cover and cook 3 mins. Serve with chutney.']},
+{id:6,name:'Poha',e:'🥘',slot:'breakfast',cui:'Indian',veg:true,grp:'carbs',cal:220,pro:5,crb:38,fat:5,fib:3,tags:['carbs','veggie'],prep:15,ing:[{q:'2 cups',n:'Thick poha'},{q:'1',n:'Onion, chopped'},{q:'1',n:'Potato, diced'},{q:'3 tbsp',n:'Peanuts'},{q:'1/2 tsp',n:'Turmeric'}],steps:['Rinse poha until soft. Drain.','Fry peanuts, add potato, cook till tender. Add onion.','Add turmeric, salt, poha. Mix gently 2 mins.','Squeeze lemon, garnish coriander. Serve warm.']},
+{id:7,name:'Avocado Toast & Egg',e:'🥑',slot:'breakfast',cui:'Continental',veg:false,grp:'carbs',cal:320,pro:12,crb:30,fat:16,fib:6,tags:['carbs','protein'],prep:12,ing:[{q:'4 slices',n:'Whole grain bread'},{q:'2',n:'Avocados, ripe'},{q:'2',n:'Eggs, poached'},{q:'1 tbsp',n:'Lemon juice'},{q:'Pinch',n:'Chilli flakes'}],steps:['Toast bread golden.','Mash avocado with lemon, salt, pepper.','Poach eggs: swirl boiling water, drop egg, cook 3 mins.','Spread avocado on toast. Top with egg. Season.']},
+{id:8,name:'Greek Yogurt Parfait',e:'🫙',slot:'breakfast',cui:'Mediterranean',veg:true,grp:'protein',cal:280,pro:16,crb:34,fat:6,fib:3,tags:['protein','fruit'],prep:5,ing:[{q:'1.5 cups',n:'Greek yogurt'},{q:'4 tbsp',n:'Granola'},{q:'1/2 cup',n:'Mixed berries'},{q:'2 tbsp',n:'Honey'}],steps:['Layer yogurt in bowls.','Add granola on top.','Add berries and drizzle honey. Serve immediately.']},
+{id:9,name:'Ven Pongal',e:'🍲',slot:'breakfast',cui:'South Indian',veg:true,grp:'carbs',cal:260,pro:8,crb:44,fat:7,fib:3,tags:['carbs','protein'],prep:25,ing:[{q:'1 cup',n:'Raw rice'},{q:'1/2 cup',n:'Moong dal'},{q:'2 tbsp',n:'Ghee'},{q:'1 tsp',n:'Pepper'},{q:'Few',n:'Cashews'}],steps:['Pressure cook rice and moong dal with 4 cups water, 4 whistles.','Heat ghee, fry cashews, add cumin, pepper, ginger, curry leaves.','Mix tempering into cooked rice-dal. Season. Serve hot with sambar.']},
+{id:10,name:'Pesarattu',e:'🫓',slot:'breakfast',cui:'South Indian',veg:true,grp:'protein',cal:240,pro:12,crb:36,fat:4,fib:5,tags:['protein','carbs'],prep:20,ing:[{q:'1.5 cups',n:'Green moong (soaked overnight)'},{q:'2',n:'Green chillies'},{q:'1 inch',n:'Ginger'},{q:'1',n:'Onion, chopped'}],steps:['Grind soaked moong with chilli, ginger, cumin, water to smooth batter.','Spread thin on hot pan. Add onion on top. Drizzle oil.','Cook till crisp. Serve with ginger chutney.']},
+{id:11,name:'Dal Tadka & Jeera Rice',e:'🍛',slot:'lunch',cui:'Indian',veg:true,grp:'protein',cal:420,pro:18,crb:64,fat:9,fib:8,tags:['protein','carbs','veggie'],prep:30,ing:[{q:'1 cup',n:'Toor dal'},{q:'2',n:'Tomatoes'},{q:'1',n:'Onion'},{q:'2 tbsp',n:'Ghee'},{q:'1 cup',n:'Basmati rice'}],steps:['Pressure cook toor dal. Mash slightly.','Make tadka: ghee, cumin, onion golden, tomatoes, spices. Pour over dal.','For jeera rice: toast cumin in ghee, add washed rice and water. Cook 15 mins.','Serve dal over jeera rice with lemon wedge.']},
+{id:12,name:'Chicken Biryani',e:'🍗',slot:'lunch',cui:'South Indian',veg:false,grp:'protein',cal:520,pro:32,crb:58,fat:14,fib:3,tags:['protein','carbs'],prep:50,ing:[{q:'500g',n:'Chicken pieces'},{q:'2 cups',n:'Basmati rice'},{q:'2',n:'Onions, thinly sliced'},{q:'1/2 cup',n:'Yogurt'},{q:'2 tbsp',n:'Biryani masala'}],steps:['Marinate chicken with yogurt, biryani masala, ginger-garlic, salt. 30 mins.','Fry onions deep golden. Cook chicken 10 mins. Remove.','Parboil rice 70%. Layer: rice, chicken, onions, mint, saffron milk.','Dum cook covered on low heat 25 mins. Mix gently to serve.']},
+{id:13,name:'Paneer Butter Masala & Roti',e:'🧀',slot:'lunch',cui:'Indian',veg:true,grp:'protein',cal:480,pro:22,crb:44,fat:18,fib:4,tags:['protein','carbs'],prep:30,ing:[{q:'300g',n:'Paneer, cubed'},{q:'4',n:'Tomatoes, pureed'},{q:'2',n:'Onions, pureed'},{q:'2 tbsp',n:'Butter'},{q:'2 tbsp',n:'Cream'},{q:'6',n:'Roti'}],steps:['Sauté onion puree in butter until golden. Add ginger-garlic, spices, tomato puree.','Cook until butter separates. Add paneer and water. Simmer 8 mins.','Stir in cream. Serve with roti garnished with coriander.']},
+{id:14,name:'Rajma Chawal',e:'🫘',slot:'lunch',cui:'Indian',veg:true,grp:'protein',cal:440,pro:16,crb:68,fat:6,fib:10,tags:['protein','carbs'],prep:40,ing:[{q:'1.5 cups',n:'Kidney beans (soaked)'},{q:'2',n:'Onions'},{q:'3',n:'Tomatoes, pureed'},{q:'1 tsp',n:'Garam masala'},{q:'1 cup',n:'Basmati rice'}],steps:['Pressure cook rajma 6–7 whistles until very soft.','Sauté onions golden. Add ginger-garlic, tomato masala. Cook till oil separates.','Add rajma with water. Simmer 15 mins. Mash some beans.','Serve over steamed rice with onion, lemon, pickle.']},
+{id:15,name:'Chicken Tacos',e:'🌮',slot:'lunch',cui:'Mexican',veg:false,grp:'protein',cal:460,pro:28,crb:42,fat:16,fib:5,tags:['protein','carbs','veggie'],prep:25,ing:[{q:'300g',n:'Chicken breast strips'},{q:'6',n:'Small tortillas'},{q:'2 tsp',n:'Taco seasoning'},{q:'1',n:'Avocado, sliced'},{q:'Salsa',n:'Tomato, onion, coriander'}],steps:['Season chicken with taco spices. Grill 4–5 mins per side until charred.','Make quick salsa: dice tomatoes, onion, coriander, lime juice.','Warm tortillas on dry pan. Build tacos: chicken, salsa, avocado, sour cream.']},
+{id:16,name:'Veg Fried Rice',e:'🍱',slot:'lunch',cui:'Chinese',veg:true,grp:'carbs',cal:400,pro:10,crb:62,fat:10,fib:4,tags:['carbs','veggie'],prep:20,ing:[{q:'2 cups',n:'Day-old cooked rice'},{q:'2',n:'Eggs'},{q:'1 cup',n:'Mixed vegetables'},{q:'3 tbsp',n:'Soy sauce'},{q:'1 tbsp',n:'Sesame oil'}],steps:['Stir-fry garlic and vegetables on high heat 3 mins.','Scramble eggs in pan. Add cold rice, break clumps.','Add soy sauce, sesame oil. Toss on high heat. Finish with spring onion.']},
+{id:17,name:'Fish Curry & Rice',e:'🐟',slot:'lunch',cui:'South Indian',veg:false,grp:'protein',cal:440,pro:30,crb:52,fat:12,fib:3,tags:['protein','carbs'],prep:35,ing:[{q:'400g',n:'Fish pieces'},{q:'1 cup',n:'Coconut milk'},{q:'2 tbsp',n:'Tamarind pulp'},{q:'1',n:'Onion, sliced'},{q:'3',n:'Tomatoes'}],steps:['Marinate fish with turmeric and salt.','Sauté onion, add tomatoes and spices. Add tamarind and water.','Slide fish gently into boiling gravy. Cook 12 mins. Add coconut milk. Simmer 3 mins.']},
+{id:18,name:'Pad Thai',e:'🍜',slot:'lunch',cui:'Thai',veg:false,grp:'carbs',cal:480,pro:18,crb:58,fat:14,fib:3,tags:['carbs','protein'],prep:25,ing:[{q:'200g',n:'Rice noodles'},{q:'150g',n:'Prawns or chicken'},{q:'3 tbsp',n:'Pad Thai sauce'},{q:'4 tbsp',n:'Peanuts, crushed'},{q:'1 cup',n:'Bean sprouts'}],steps:['Stir-fry protein in hot wok. Add drained noodles and sauce.','Push aside, scramble eggs. Fold into noodles. Add sprouts.','Plate with peanuts and lime wedge.']},
+{id:19,name:'Quinoa Buddha Bowl',e:'🥗',slot:'lunch',cui:'Continental',veg:true,grp:'protein',cal:420,pro:18,crb:52,fat:12,fib:8,tags:['protein','carbs','veggie'],prep:30,ing:[{q:'1 cup',n:'Quinoa'},{q:'1 can',n:'Chickpeas'},{q:'1',n:'Sweet potato, cubed'},{q:'3 tbsp',n:'Tahini dressing'},{q:'2 cups',n:'Mixed greens'}],steps:['Cook quinoa 15 mins in water. Roast chickpeas and sweet potato 200°C, 25 mins.','Make tahini dressing: tahini, lemon, olive oil, garlic.','Bowl: quinoa base, roasted veg, greens, avocado, tahini drizzle.']},
+{id:20,name:'Chana Masala',e:'🫘',slot:'lunch',cui:'Indian',veg:true,grp:'protein',cal:460,pro:14,crb:62,fat:14,fib:8,tags:['protein','carbs'],prep:30,ing:[{q:'1.5 cups',n:'Chickpeas (cooked)'},{q:'3',n:'Tomatoes, pureed'},{q:'2',n:'Onions'},{q:'1 tsp',n:'Chana masala'},{q:'4',n:'Bhature or puri'}],steps:['Sauté onion golden. Add masala, tomato puree. Cook till oil separates.','Add chickpeas and water. Simmer 15 mins, mash some for thickness.','Serve with bhature, garnished with onion and lemon.']},
+{id:21,name:'Mushroom Risotto',e:'🍄',slot:'lunch',cui:'Italian',veg:true,grp:'carbs',cal:440,pro:12,crb:60,fat:14,fib:3,tags:['carbs','veggie'],prep:35,ing:[{q:'1.5 cups',n:'Arborio rice'},{q:'300g',n:'Mushrooms'},{q:'1 litre',n:'Warm veg stock'},{q:'4 tbsp',n:'Parmesan'},{q:'2 tbsp',n:'Butter'}],steps:['Sauté mushrooms until golden. Set aside.','Toast rice in butter. Add stock one ladle at a time, stirring 20 mins.','Fold in mushrooms, parmesan, butter. Season. Serve immediately.']},
+{id:22,name:'Curd Rice',e:'🍚',slot:'lunch',cui:'South Indian',veg:true,grp:'carbs',cal:320,pro:10,crb:52,fat:6,fib:2,tags:['carbs','protein'],prep:15,ing:[{q:'2 cups',n:'Cooked rice'},{q:'1.5 cups',n:'Fresh curd'},{q:'1 tsp',n:'Mustard seeds'},{q:'Few',n:'Curry leaves'},{q:'2 tbsp',n:'Pomegranate'}],steps:['Mash warm rice slightly. Cool. Mix in curd and milk.','Temper: mustard, curry leaves, dried chilli. Pour over curd rice.','Top with pomegranate. Serve with pickle.']},
+{id:23,name:'Spaghetti Aglio e Olio',e:'🍝',slot:'lunch',cui:'Italian',veg:true,grp:'carbs',cal:460,pro:12,crb:68,fat:14,fib:4,tags:['carbs'],prep:25,ing:[{q:'300g',n:'Spaghetti'},{q:'6 cloves',n:'Garlic, sliced'},{q:'4 tbsp',n:'Olive oil'},{q:'1/2 tsp',n:'Chilli flakes'},{q:'3 tbsp',n:'Parsley'}],steps:['Boil spaghetti. Reserve 1 cup pasta water.','Cook garlic in olive oil very slowly until golden. Add chilli flakes.','Toss pasta in garlic oil with pasta water. Add parsley. Serve.']},
+{id:24,name:'Tomato Rice',e:'🍅',slot:'lunch',cui:'South Indian',veg:true,grp:'carbs',cal:340,pro:7,crb:58,fat:8,fib:4,tags:['carbs','veggie'],prep:25,ing:[{q:'2 cups',n:'Cooked rice'},{q:'3',n:'Tomatoes, chopped'},{q:'1',n:'Onion, sliced'},{q:'1 tsp',n:'Chilli powder'},{q:'Few',n:'Curry leaves'}],steps:['Splutter mustard, curry leaves. Sauté onion golden. Add tomatoes, spices.','Cook till oil separates. Add rice and fold gently.','Heat 3 mins. Serve with raita and papad.']},
+{id:25,name:'Roasted Chana',e:'🫘',slot:'snack',cui:'Indian',veg:true,grp:'protein',cal:180,pro:10,crb:26,fat:3,fib:6,tags:['protein'],prep:5,ing:[{q:'1 cup',n:'Roasted chickpeas'},{q:'1/2 tsp',n:'Chaat masala'},{q:'Squeeze',n:'Lemon juice'}],steps:['Toss roasted chana with chaat masala, chilli powder, black salt.','Add lemon juice. Store in jar. Ready to eat anytime.']},
+{id:26,name:'Hummus & Veggie Sticks',e:'🥕',slot:'snack',cui:'Mediterranean',veg:true,grp:'protein',cal:200,pro:8,crb:22,fat:8,fib:5,tags:['protein','veggie'],prep:10,ing:[{q:'1 can',n:'Chickpeas'},{q:'3 tbsp',n:'Tahini'},{q:'2 tbsp',n:'Lemon juice'},{q:'2',n:'Carrots'},{q:'1',n:'Cucumber'}],steps:['Blend chickpeas, tahini, lemon, garlic, water until silky. Season.','Cut vegetables into sticks. Serve with hummus bowl drizzled with olive oil.']},
+{id:27,name:'Boiled Eggs',e:'🥚',slot:'snack',cui:'Continental',veg:false,grp:'protein',cal:160,pro:12,crb:2,fat:10,fib:0,tags:['protein'],prep:12,ing:[{q:'4',n:'Eggs'},{q:'Pinch',n:'Chaat masala'}],steps:['Boil eggs 9–10 mins. Ice bath 5 mins to stop cooking.','Peel, halve, sprinkle chaat masala. Eat immediately.']},
+{id:28,name:'Fruit Chaat',e:'🍑',slot:'snack',cui:'Indian',veg:true,grp:'fruit',cal:140,pro:2,crb:34,fat:0,fib:4,tags:['fruit'],prep:8,ing:[{q:'1',n:'Apple, diced'},{q:'1',n:'Banana, sliced'},{q:'1/2 cup',n:'Pomegranate'},{q:'1/2 tsp',n:'Chaat masala'},{q:'Squeeze',n:'Lemon'}],steps:['Cut all fruits. Keep banana last.','Toss with chaat masala, black salt, lemon. Serve immediately.']},
+{id:29,name:'Peanut Butter Toast',e:'🍞',slot:'snack',cui:'Continental',veg:true,grp:'carbs',cal:240,pro:10,crb:28,fat:12,fib:3,tags:['carbs','protein'],prep:5,ing:[{q:'4 slices',n:'Whole grain bread'},{q:'4 tbsp',n:'Peanut butter'},{q:'1',n:'Banana, sliced'},{q:'1 tsp',n:'Honey'}],steps:['Toast bread. Spread peanut butter. Layer banana. Drizzle honey.']},
+{id:30,name:'Mixed Nuts & Dark Chocolate',e:'🍫',slot:'snack',cui:'Continental',veg:true,grp:'protein',cal:250,pro:6,crb:18,fat:18,fib:3,tags:['protein'],prep:2,ing:[{q:'4 tbsp',n:'Mixed nuts'},{q:'2 squares',n:'Dark chocolate 70%+'}],steps:['Portion nuts and chocolate into two small bowls. Done.']},
+{id:31,name:'Banana Smoothie',e:'🍌',slot:'snack',cui:'Continental',veg:true,grp:'fruit',cal:280,pro:10,crb:44,fat:8,fib:4,tags:['fruit','protein'],prep:5,ing:[{q:'2',n:'Bananas'},{q:'1.5 cups',n:'Milk'},{q:'2 tbsp',n:'Peanut butter'},{q:'1 tbsp',n:'Honey'}],steps:['Blend all ingredients on high 60 seconds. Pour into glasses. Drink immediately.']},
+{id:32,name:'Sprouts Chaat',e:'🌱',slot:'snack',cui:'Indian',veg:true,grp:'protein',cal:160,pro:10,crb:22,fat:2,fib:6,tags:['protein','veggie'],prep:8,ing:[{q:'1.5 cups',n:'Mixed sprouts'},{q:'1',n:'Tomato, chopped'},{q:'1',n:'Onion, chopped'},{q:'1/2 tsp',n:'Chaat masala'},{q:'Squeeze',n:'Lemon'}],steps:['Blanch sprouts 2 mins. Drain.','Mix with tomato, onion, chaat masala, black salt, lemon. Serve.']},
+{id:33,name:'Popcorn',e:'🍿',slot:'snack',cui:'American',veg:true,grp:'carbs',cal:150,pro:3,crb:28,fat:4,fib:3,tags:['carbs'],prep:8,ing:[{q:'1/2 cup',n:'Corn kernels'},{q:'1 tbsp',n:'Oil'},{q:'Salt',n:'To taste'}],steps:['Heat oil with 3 test kernels. When they pop, add rest. Cover.','Shake every 30 seconds until popping stops. Season immediately.']},
+{id:34,name:'Grilled Chicken & Chapathi',e:'🍗',slot:'dinner',cui:'Indian',veg:false,grp:'protein',cal:510,pro:38,crb:44,fat:14,fib:4,tags:['protein','carbs'],prep:30,ing:[{q:'400g',n:'Chicken breast'},{q:'3 tbsp',n:'Yogurt'},{q:'1 tsp',n:'Tandoori masala'},{q:'6',n:'Chapathi'},{q:'Mint chutney',n:'For serving'}],steps:['Marinate chicken with yogurt, tandoori masala, ginger-garlic, lemon, salt. 1 hour minimum.','Grill on high heat 6–7 mins per side until charred and cooked.','Rest 5 mins. Slice. Serve with chapathi, onion, lemon, mint chutney.']},
+{id:35,name:'Dal Makhani & Roti',e:'🫘',slot:'dinner',cui:'Indian',veg:true,grp:'protein',cal:460,pro:16,crb:58,fat:12,fib:9,tags:['protein','carbs'],prep:50,ing:[{q:'1 cup',n:'Black urad dal (soaked)'},{q:'3 tbsp',n:'Butter'},{q:'3 tbsp',n:'Cream'},{q:'2',n:'Tomatoes, pureed'},{q:'6',n:'Butter roti'}],steps:['Pressure cook urad dal 8–10 whistles until very soft.','Cook onion-tomato masala. Add dal. Simmer 30 mins on low.','Add cream, garam masala, butter. Serve with butter roti.']},
+{id:36,name:'Tofu Stir Fry & Noodles',e:'🥢',slot:'dinner',cui:'Chinese',veg:true,grp:'protein',cal:420,pro:20,crb:50,fat:12,fib:4,tags:['protein','carbs','veggie'],prep:25,ing:[{q:'300g',n:'Firm tofu, pressed'},{q:'200g',n:'Noodles, cooked'},{q:'2 cups',n:'Broccoli'},{q:'3 tbsp',n:'Soy sauce'},{q:'1 tbsp',n:'Sesame oil'}],steps:['Fry tofu cubes until golden. Set aside.','Stir-fry broccoli 3 mins. Add garlic, soy sauce, hoisin.','Add noodles and tofu. Toss on high 2 mins. Drizzle sesame oil.']},
+{id:37,name:'Vegetable Biryani',e:'🍛',slot:'dinner',cui:'Indian',veg:true,grp:'carbs',cal:460,pro:10,crb:72,fat:10,fib:6,tags:['carbs','veggie'],prep:40,ing:[{q:'2 cups',n:'Basmati rice'},{q:'2 cups',n:'Mixed vegetables'},{q:'2',n:'Onions, sliced'},{q:'2 tbsp',n:'Biryani masala'},{q:'Few',n:'Mint leaves'}],steps:['Fry onions golden crispy. Marinate veg with yogurt and biryani masala.','Parboil rice 70%. Cook veg in ghee 8 mins.','Layer: veg, rice, mint, fried onions. Dum cook covered 20 mins.']},
+{id:38,name:'Chicken Enchiladas',e:'🌯',slot:'dinner',cui:'Mexican',veg:false,grp:'protein',cal:520,pro:32,crb:48,fat:18,fib:5,tags:['protein','carbs'],prep:40,ing:[{q:'300g',n:'Chicken, shredded'},{q:'6',n:'Flour tortillas'},{q:'1.5 cups',n:'Enchilada sauce'},{q:'1 cup',n:'Cheese, grated'},{q:'1 can',n:'Black beans'}],steps:['Cook chicken with cumin, shred. Mix with beans and sauce.','Fill tortillas, roll, place seam-down in baking dish.','Pour sauce over, top with cheese. Bake 190°C for 20 mins.']},
+{id:39,name:'Egg Curry & Rice',e:'🥚',slot:'dinner',cui:'Indian',veg:false,grp:'protein',cal:420,pro:20,crb:54,fat:14,fib:3,tags:['protein','carbs'],prep:25,ing:[{q:'6',n:'Eggs, hard-boiled'},{q:'3',n:'Tomatoes, pureed'},{q:'2',n:'Onions, chopped'},{q:'1 tsp each',n:'Cumin, coriander, chilli'},{q:'2 cups',n:'Steamed rice'}],steps:['Score boiled eggs. Shallow fry till golden. Set aside.','Make onion-tomato masala with all spices. Add water.','Add eggs. Simmer 8 mins. Serve with rice.']},
+{id:40,name:'Baked Salmon & Roasted Veg',e:'🐟',slot:'dinner',cui:'Continental',veg:false,grp:'protein',cal:440,pro:36,crb:18,fat:20,fib:5,tags:['protein','veggie'],prep:30,ing:[{q:'2 fillets',n:'Salmon (200g each)'},{q:'1',n:'Broccoli'},{q:'2',n:'Carrots, sliced'},{q:'3 tbsp',n:'Olive oil'},{q:'2',n:'Lemons'}],steps:['Toss veg in olive oil, salt, pepper. Roast 200°C 10 mins.','Season salmon with herbs, garlic, lemon. Place on same tray.','Bake 12–15 mins until salmon flakes. Serve with lemon.']},
+{id:41,name:'Palak Paneer & Roti',e:'🟢',slot:'dinner',cui:'Indian',veg:true,grp:'protein',cal:440,pro:20,crb:42,fat:16,fib:5,tags:['protein','carbs','veggie'],prep:30,ing:[{q:'300g',n:'Paneer, cubed'},{q:'4 cups',n:'Spinach, blanched & pureed'},{q:'1',n:'Onion'},{q:'2 tbsp',n:'Cream'},{q:'6',n:'Roti'}],steps:['Blanch spinach, puree. Fry paneer golden.','Make onion-tomato masala. Add spinach puree. Cook 5 mins.','Add paneer, cream, garam masala. Serve with roti.']},
+{id:42,name:'Chicken Stir Fry & Rice',e:'🥘',slot:'dinner',cui:'Chinese',veg:false,grp:'protein',cal:460,pro:30,crb:52,fat:12,fib:4,tags:['protein','carbs','veggie'],prep:25,ing:[{q:'300g',n:'Chicken strips'},{q:'1',n:'Bell pepper'},{q:'1 cup',n:'Broccoli'},{q:'3 tbsp',n:'Oyster sauce'},{q:'2 cups',n:'Steamed rice'}],steps:['Marinate chicken in soy sauce, cornstarch. Stir-fry till cooked.','Stir-fry veg on high 3 mins. Add chicken, oyster sauce. Toss 2 mins.','Serve over steamed rice. Garnish spring onion.']},
+{id:43,name:'Margherita Pizza',e:'🍕',slot:'dinner',cui:'Italian',veg:true,grp:'carbs',cal:520,pro:16,crb:64,fat:18,fib:4,tags:['carbs','protein'],prep:40,ing:[{q:'2 cups',n:'Pizza dough'},{q:'1/2 cup',n:'Tomato sauce'},{q:'150g',n:'Mozzarella'},{q:'Few',n:'Fresh basil'},{q:'2 tbsp',n:'Olive oil'}],steps:['Preheat oven 250°C. Stretch dough thin.','Spread sauce. Top with mozzarella, olive oil, oregano.','Bake 10–12 mins until crust golden and cheese bubbling. Add basil.']},
+{id:44,name:'Soya Chunk Curry & Rice',e:'🫘',slot:'dinner',cui:'Indian',veg:true,grp:'protein',cal:400,pro:22,crb:54,fat:8,fib:6,tags:['protein','carbs'],prep:30,ing:[{q:'1.5 cups',n:'Soya chunks'},{q:'3',n:'Tomatoes, pureed'},{q:'2',n:'Onions'},{q:'1 tsp',n:'Garam masala'},{q:'2 cups',n:'Rice, cooked'}],steps:['Soak soya chunks in hot water 15 mins. Squeeze dry.','Make masala: onion golden, ginger-garlic, tomato puree, spices.','Add soya and water. Simmer 15 mins. Serve with rice.']},
+{id:45,name:'Masala Egg Paratha',e:'🫔',slot:'dinner',cui:'Indian',veg:false,grp:'carbs',cal:440,pro:14,crb:52,fat:16,fib:4,tags:['carbs','protein'],prep:25,ing:[{q:'2 cups',n:'Whole wheat flour'},{q:'3',n:'Eggs'},{q:'1',n:'Onion, chopped'},{q:'2',n:'Green chillies'},{q:'4 tbsp',n:'Ghee'}],steps:['Knead flour into dough. Rest 20 mins.','Beat eggs with onion, chilli, cumin, coriander.','Roll dough thin. Pour egg mix in centre. Fold edges over.','Cook on hot tawa with ghee until golden both sides.']},
+{id:46,name:'Lemon Rice & Raita',e:'🍚',slot:'dinner',cui:'South Indian',veg:true,grp:'carbs',cal:360,pro:8,crb:58,fat:8,fib:3,tags:['carbs','protein'],prep:20,ing:[{q:'3 cups',n:'Cooked rice'},{q:'3 tbsp',n:'Lemon juice'},{q:'4 tbsp',n:'Roasted peanuts'},{q:'1 cup',n:'Cucumber raita'}],steps:['Temper mustard, peanuts, curry leaves, turmeric. Pour over rice.','Add lemon juice. Toss. Season.','Serve with cucumber raita and pappad.']},
+{id:47,name:'Greek Chicken Bowl',e:'🥗',slot:'dinner',cui:'Mediterranean',veg:false,grp:'protein',cal:480,pro:32,crb:38,fat:16,fib:5,tags:['protein','carbs','veggie'],prep:30,ing:[{q:'300g',n:'Chicken thighs'},{q:'1 cup',n:'Quinoa, cooked'},{q:'4 tbsp',n:'Tzatziki'},{q:'1/2 cup',n:'Olives'},{q:'1',n:'Cucumber, diced'}],steps:['Marinate chicken in lemon, olive oil, oregano. Grill 7–8 mins per side.','Slice rested chicken.','Bowl: quinoa, chicken, olives, cucumber, tomato, tzatziki drizzle.']},
+{id:48,name:'Chicken Noodle Soup',e:'🍜',slot:'dinner',cui:'Chinese',veg:false,grp:'protein',cal:360,pro:24,crb:38,fat:8,fib:3,tags:['protein','carbs'],prep:25,ing:[{q:'200g',n:'Chicken breast'},{q:'150g',n:'Noodles'},{q:'1 litre',n:'Chicken stock'},{q:'1 inch',n:'Ginger'},{q:'2',n:'Spring onions'}],steps:['Simmer stock with ginger and garlic 5 mins.','Add chicken strips, cook 8 mins. Add bok choy.','Season with soy sauce, sesame oil. Ladle over cooked noodles.']},
+
+// ── KERALA DISHES ────────────────────────────────────────
+// BREAKFAST
+{id:49,name:'Appam with Stew',e:'🥞',slot:'breakfast',cui:'Kerala',veg:false,grp:'carbs',cal:320,pro:12,crb:52,fat:8,fib:3,tags:['carbs','protein'],prep:25,ing:[{q:'2 cups',n:'Raw rice, soaked'},{q:'1/2 cup',n:'Coconut milk'},{q:'1 tsp',n:'Yeast or toddy'},{q:'300g',n:'Chicken or veg for stew'},{q:'1 cup',n:'Thin coconut milk'},{q:'1',n:'Onion'},{q:'2',n:'Potatoes'}],steps:['Grind soaked rice with coconut milk and yeast. Ferment 6–8 hrs.','Heat appam pan (appa chatti), pour ladle of batter, swirl to coat sides. Cover and cook 2 mins — edges crisp, centre soft.','For stew: cook onion, potato, green chilli in coconut oil. Add coconut milk. Simmer 10 mins. Add cooked chicken last.','Serve soft appam with coconut stew.']},
+{id:50,name:'Puttu & Kadala Curry',e:'🫙',slot:'breakfast',cui:'Kerala',veg:true,grp:'carbs',cal:380,pro:14,crb:62,fat:8,fib:8,tags:['carbs','protein'],prep:30,ing:[{q:'2 cups',n:'Rice flour (puttu podi)'},{q:'1/2 cup',n:'Grated coconut'},{q:'1.5 cups',n:'Black chickpeas (soaked overnight)'},{q:'2',n:'Onions, sliced'},{q:'1 tsp',n:'Garam masala'}],steps:['Sprinkle water into rice flour, mix until it holds shape when pressed but crumbles.','Layer coconut and flour alternately in puttu maker. Steam 8–10 mins until done.','Cook kadala: pressure cook chickpeas 4 whistles. Make masala with onion, tomato, coconut paste, garam masala.','Simmer chickpeas in masala 10 mins. Serve puttu unmoulded with kadala curry and banana.']},
+{id:51,name:'Kerala Parotta',e:'🫓',slot:'breakfast',cui:'Kerala',veg:true,grp:'carbs',cal:340,pro:8,crb:58,fat:10,fib:2,tags:['carbs'],prep:30,ing:[{q:'2 cups',n:'Maida (all-purpose flour)'},{q:'1 egg',n:'(optional)'},{q:'2 tbsp',n:'Oil'},{q:'Salt',n:'To taste'},{q:'Warm milk/water',n:'To knead'}],steps:['Knead maida with egg, oil, salt and warm milk into very soft dough. Rest 30 mins.','Divide into balls. Roll thin, fold and roll again repeatedly to create layers.','Cook on hot tawa with oil, pressing and fluffing until golden and flaky.','Beat cooked parottas gently with both hands to separate the layers. Serve with egg roast or beef curry.']},
+{id:52,name:'Pathiri',e:'🫓',slot:'breakfast',cui:'Kerala',veg:true,grp:'carbs',cal:260,pro:5,crb:48,fat:5,fib:2,tags:['carbs'],prep:20,ing:[{q:'2 cups',n:'Rice flour'},{q:'1.5 cups',n:'Boiling water'},{q:'1/2 cup',n:'Coconut milk'},{q:'Salt',n:'To taste'}],steps:['Mix boiling water into rice flour to form a soft dough. Add coconut milk.','Divide into balls. Roll very thin using a rolling pin.','Cook on a dry hot tawa 1–2 mins per side. Should stay soft and white.','Serve warm with chicken or fish curry.']},
+{id:53,name:'Idiyappam with Coconut Milk',e:'🕸',slot:'breakfast',cui:'Kerala',veg:true,grp:'carbs',cal:280,pro:4,crb:54,fat:6,fib:2,tags:['carbs'],prep:25,ing:[{q:'2 cups',n:'Rice flour'},{q:'1.5 cups',n:'Boiling water'},{q:'1 cup',n:'Thick coconut milk'},{q:'2 tbsp',n:'Jaggery (optional)'},{q:'Salt',n:'To taste'}],steps:['Mix boiling water into rice flour. Knead into soft dough.','Press through idiyappam press onto idli plates to form string hoppers.','Steam 8–10 mins until cooked through.','Serve with sweet coconut milk (mixed with jaggery) or with egg curry.']},
+// LUNCH
+{id:54,name:'Kerala Fish Curry (Meen Curry)',e:'🐟',slot:'lunch',cui:'Kerala',veg:false,grp:'protein',cal:380,pro:32,crb:12,fat:18,fib:2,tags:['protein'],prep:30,ing:[{q:'500g',n:'Fish (Rohu, Tilapia or Sardine)'},{q:'3 tbsp',n:'Kashmiri red chilli powder'},{q:'1/2 tsp',n:'Turmeric'},{q:'2 tbsp',n:'Coconut oil'},{q:'1',n:'Kudampuli (Gamboge / fish tamarind)'},{q:'Few',n:'Curry leaves'},{q:'1 tsp',n:'Fenugreek seeds'}],steps:['Soak kudampuli in 1/2 cup warm water 15 mins.','Heat coconut oil in a clay pot. Add fenugreek seeds, then curry leaves.','Add chilli powder and coriander powder. Fry 1 min.','Add kudampuli with soaking water and more water. Bring to boil.','Slide fish in gently. Cover and cook 12–15 mins. Do not stir — shake the pot instead. Drizzle coconut oil before serving.']},
+{id:55,name:'Karimeen Pollichathu',e:'🐠',slot:'lunch',cui:'Kerala',veg:false,grp:'protein',cal:420,pro:36,crb:8,fat:22,fib:2,tags:['protein'],prep:40,ing:[{q:'2',n:'Pearl spot fish (karimeen), whole'},{q:'3 tbsp',n:'Red chilli powder'},{q:'1 tbsp',n:'Coriander powder'},{q:'1',n:'Lemon, juice'},{q:'Banana leaves',n:'For wrapping'},{q:'1',n:'Onion, thinly sliced'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Score fish deeply. Marinate with chilli, coriander, turmeric, lemon, salt for 30 mins.','Shallow fry marinated fish on both sides 3 mins each.','Sauté sliced onion with green chilli and tomato in coconut oil. Layer on banana leaf.','Place fish on onion mix, wrap in banana leaf, secure with toothpick.','Cook wrapped parcels on a flat pan on low heat 8 mins per side. Open at table.']},
+{id:56,name:'Prawn Moilee',e:'🦐',slot:'lunch',cui:'Kerala',veg:false,grp:'protein',cal:360,pro:28,crb:10,fat:20,fib:2,tags:['protein'],prep:25,ing:[{q:'400g',n:'Prawns, cleaned'},{q:'1.5 cups',n:'Coconut milk'},{q:'2',n:'Green chillies, slit'},{q:'1',n:'Onion, sliced'},{q:'1 tsp',n:'Turmeric'},{q:'Few',n:'Curry leaves'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Heat coconut oil. Sauté onion, green chilli, ginger-garlic until soft.','Add turmeric. Add thin coconut milk. Bring to gentle simmer.','Add prawns. Cook 5–7 mins until pink and cooked.','Add thick coconut milk. Simmer 2 mins — do not boil after thick milk.','Finish with curry leaves and coconut oil drizzle. Serve with appam or rice.']},
+{id:57,name:'Beef Fry (Beef Ularthiyathu)',e:'🥩',slot:'lunch',cui:'Kerala',veg:false,grp:'protein',cal:480,pro:38,crb:8,fat:28,fib:2,tags:['protein'],prep:45,ing:[{q:'500g',n:'Beef, cubed'},{q:'2 tbsp',n:'Red chilli powder'},{q:'1 tsp',n:'Garam masala'},{q:'1 tsp',n:'Black pepper, coarse'},{q:'Few',n:'Curry leaves'},{q:'2',n:'Onions, sliced thin'},{q:'3 tbsp',n:'Coconut oil'}],steps:['Pressure cook beef with chilli, turmeric, garam masala, salt and ginger-garlic paste for 5–6 whistles.','Open cooker. Cook on high heat until water evaporates completely.','Heat coconut oil in a wide pan. Add sliced onion, cook deep golden.','Add curry leaves and the cooked beef. Fry on medium-high, stirring occasionally, 15–20 mins until dark and crispy on edges.','Add coarsely ground pepper at the end. Serve with parotta or rice.']},
+{id:58,name:'Kerala Chicken Curry',e:'🍗',slot:'lunch',cui:'Kerala',veg:false,grp:'protein',cal:440,pro:34,crb:12,fat:24,fib:3,tags:['protein'],prep:35,ing:[{q:'500g',n:'Chicken, curry cut'},{q:'2',n:'Onions, sliced'},{q:'3',n:'Tomatoes, chopped'},{q:'1.5 cups',n:'Coconut milk'},{q:'2 tbsp',n:'Red chilli powder'},{q:'1 tsp',n:'Kerala garam masala'},{q:'3 tbsp',n:'Coconut oil'}],steps:['Marinate chicken with turmeric, chilli powder, salt for 20 mins.','Heat coconut oil. Sauté onion until golden. Add ginger-garlic paste.','Add tomatoes, coriander powder, chilli powder. Cook until oil separates.','Add marinated chicken. Cook 10 mins, stirring.','Pour in coconut milk. Simmer 15 mins. Finish with Kerala garam masala and curry leaves.']},
+{id:59,name:'Thalassery Biryani',e:'🍛',slot:'lunch',cui:'Kerala',veg:false,grp:'protein',cal:560,pro:32,crb:64,fat:18,fib:3,tags:['protein','carbs'],prep:60,ing:[{q:'500g',n:'Chicken or beef'},{q:'2 cups',n:'Jeerakasala rice (small-grain Malabar rice)'},{q:'3',n:'Onions, fried crispy'},{q:'1/2 cup',n:'Yogurt'},{q:'1 tbsp',n:'Thalassery biryani masala'},{q:'Few',n:'Cashews and raisins'}],steps:['Marinate meat with yogurt, biryani masala, fried onion, ginger-garlic for 1 hour.','Cook Jeerakasala rice with whole spices until 80% done. Drain.','Cook marinated meat on medium heat until done, about 20 mins.','Layer: meat, rice, fried onions, cashews, raisins, ghee, saffron milk.','Dum on very low heat 20 mins. Serve with raita and pappadam.']},
+{id:60,name:'Kappa (Tapioca) & Fish Curry',e:'🥔',slot:'lunch',cui:'Kerala',veg:false,grp:'carbs',cal:400,pro:24,crb:52,fat:12,fib:4,tags:['carbs','protein'],prep:35,ing:[{q:'500g',n:'Tapioca (kappa), peeled and cubed'},{q:'300g',n:'Fish curry (see Kerala Fish Curry)'},{q:'1 tsp',n:'Turmeric'},{q:'1/2 cup',n:'Grated coconut'},{q:'4',n:'Green chillies'}],steps:['Boil tapioca with turmeric and salt until very soft and mushy, about 20 mins.','Drain most water. Mash slightly.','Grind coconut with green chilli and cumin coarsely.','Mix coconut paste into tapioca while hot. Season.','Serve hot kappa with spicy Kerala fish curry poured over — the ultimate Kerala comfort food.']},
+{id:61,name:'Avial',e:'🥬',slot:'lunch',cui:'Kerala',veg:true,grp:'veggie',cal:280,pro:6,crb:32,fat:14,fib:6,tags:['veggie','carbs'],prep:30,ing:[{q:'2 cups',n:'Mixed veg (raw banana, drumstick, yam, carrot, beans, raw mango)'},{q:'1 cup',n:'Grated coconut'},{q:'4',n:'Green chillies'},{q:'1 tsp',n:'Cumin'},{q:'1/2 cup',n:'Curd'},{q:'2 tbsp',n:'Coconut oil'},{q:'Few',n:'Curry leaves'}],steps:['Cut all vegetables into thick finger-length pieces. Cook in just enough water with turmeric until tender but not mushy.','Grind coconut, green chilli, and cumin coarsely. Do not make smooth paste.','Add coconut paste to cooked vegetables. Cook 3 mins.','Add curd and mix gently on low heat. Do not boil after curd.','Finish with coconut oil and curry leaves. Serve with rice.']},
+{id:62,name:'Erissery (Pumpkin & Lentil)',e:'🎃',slot:'lunch',cui:'Kerala',veg:true,grp:'veggie',cal:300,pro:10,crb:44,fat:10,fib:7,tags:['veggie','protein'],prep:30,ing:[{q:'2 cups',n:'Yellow pumpkin, cubed'},{q:'1/2 cup',n:'Cow peas or black-eyed peas'},{q:'1 cup',n:'Grated coconut'},{q:'1 tsp',n:'Cumin'},{q:'1/2 tsp',n:'Turmeric'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Pressure cook cow peas 3 whistles. Cook pumpkin separately until soft.','Combine peas and pumpkin. Mash lightly. Season with salt and turmeric.','Grind coconut with cumin and chilli coarsely. Add to the pumpkin mixture.','Cook together 5 mins, stirring.','For tempering: heat coconut oil, add mustard, dried red chilli, curry leaves, and remaining coconut — fry until golden. Pour over erissery.']},
+{id:63,name:'Olan',e:'🥒',slot:'lunch',cui:'Kerala',veg:true,grp:'veggie',cal:240,pro:8,crb:30,fat:12,fib:5,tags:['veggie','protein'],prep:30,ing:[{q:'1 cup',n:'Ash gourd (kumbalanga), cubed'},{q:'1/2 cup',n:'Black-eyed peas, cooked'},{q:'1.5 cups',n:'Coconut milk'},{q:'4',n:'Green chillies, slit'},{q:'Few',n:'Curry leaves'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Cook ash gourd with green chilli and salt until tender.','Add cooked black-eyed peas to the cooked gourd.','Pour in thin coconut milk. Cook 5 mins.','Add thick coconut milk. Stir gently. Turn off heat.','Finish with curry leaves and coconut oil. Olan should be mild and delicate — do not over-spice.']},
+{id:64,name:'Thoran (Cabbage)',e:'🥬',slot:'lunch',cui:'Kerala',veg:true,grp:'veggie',cal:180,pro:4,crb:18,fat:10,fib:5,tags:['veggie'],prep:15,ing:[{q:'1 small',n:'Cabbage, finely shredded'},{q:'1/2 cup',n:'Grated coconut'},{q:'3',n:'Green chillies'},{q:'1 tsp',n:'Mustard seeds'},{q:'2 tbsp',n:'Coconut oil'},{q:'Few',n:'Curry leaves'}],steps:['Coarsely grind coconut with green chilli. Do not make paste.','Heat coconut oil. Splutter mustard seeds. Add curry leaves and dried red chilli.','Add cabbage and salt. Mix well. Cook covered on low heat 5 mins.','Add coconut mixture. Mix and cook uncovered 3 mins.','Should be dry — not watery. Serve as side with rice and curry.']},
+{id:65,name:'Sambar Rice',e:'🍛',slot:'lunch',cui:'Kerala',veg:true,grp:'carbs',cal:380,pro:12,crb:62,fat:8,fib:6,tags:['carbs','protein','veggie'],prep:30,ing:[{q:'2 cups',n:'Cooked rice'},{q:'1 cup',n:'Toor dal'},{q:'2 tbsp',n:'Tamarind pulp'},{q:'1 cup',n:'Mixed veg (drumstick, tomato, shallots)'},{q:'2 tbsp',n:'Sambar powder'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Pressure cook dal. Add tamarind water, vegetables, sambar powder. Simmer 15 mins.','Temper with mustard, curry leaves, dried red chilli in coconut oil.','Pour over rice or mix together.']},
+// SNACK
+{id:66,name:'Unniyappam',e:'🟤',slot:'snack',cui:'Kerala',veg:true,grp:'carbs',cal:220,pro:3,crb:38,fat:7,fib:2,tags:['carbs','fruit'],prep:30,ing:[{q:'1 cup',n:'Raw rice, soaked'},{q:'3',n:'Ripe bananas'},{q:'1/2 cup',n:'Jaggery, melted'},{q:'1/4 cup',n:'Grated coconut'},{q:'1/4 tsp',n:'Cardamom'},{q:'Oil',n:'For frying'}],steps:['Grind soaked rice with banana and melted jaggery to smooth batter.','Add coconut and cardamom. Batter should be thick but pourable.','Heat appe pan (paniyaram pan). Fill each hole with oil.','Pour batter into hot oil-filled holes. Cook until golden on bottom, flip, cook other side.','Drain on paper. Serve warm — crispy outside, soft inside.']},
+{id:67,name:'Ela Ada',e:'🍃',slot:'snack',cui:'Kerala',veg:true,grp:'carbs',cal:200,pro:3,crb:36,fat:5,fib:3,tags:['carbs','fruit'],prep:30,ing:[{q:'1 cup',n:'Rice flour'},{q:'1.5 cups',n:'Boiling water'},{q:'1/2 cup',n:'Grated coconut'},{q:'3 tbsp',n:'Jaggery, grated'},{q:'Banana leaves',n:'For wrapping'}],steps:['Mix boiling water into rice flour. Knead soft dough.','Mix coconut and jaggery for filling.','Place dough on banana leaf, flatten thin. Add coconut filling in centre. Fold leaf.','Steam wrapped parcels 15 mins.','Open leaf and eat warm — festival favourite.']},
+{id:68,name:'Pazham Pori (Banana Fritters)',e:'🍌',slot:'snack',cui:'Kerala',veg:true,grp:'carbs',cal:240,pro:2,crb:42,fat:8,fib:3,tags:['carbs','fruit'],prep:15,ing:[{q:'3',n:'Ripe nendran bananas'},{q:'1/2 cup',n:'Maida'},{q:'2 tbsp',n:'Rice flour'},{q:'Pinch',n:'Turmeric'},{q:'2 tbsp',n:'Jaggery powder'},{q:'Oil',n:'For deep frying'}],steps:['Make thick batter with maida, rice flour, turmeric, jaggery, pinch of salt and water.','Peel nendran bananas and cut lengthwise into 2–3 slices.','Dip each slice in batter, coating well.','Deep fry in medium-hot oil until golden all over.','Drain and serve hot — best with evening tea.']},
+{id:69,name:'Sulaimani Chai',e:'☕',slot:'snack',cui:'Kerala',veg:true,grp:'carbs',cal:60,pro:0,crb:12,fat:0,fib:0,tags:['carbs'],prep:10,ing:[{q:'2 cups',n:'Water'},{q:'1 tsp',n:'Black tea leaves'},{q:'4 cloves',n:'Whole'},{q:'1 inch',n:'Cinnamon stick'},{q:'2 tbsp',n:'Lemon juice'},{q:'2 tbsp',n:'Sugar or jaggery'}],steps:['Boil water with cloves and cinnamon 3 mins.','Add tea leaves and simmer 2 mins.','Strain into cups. Add lemon juice and sweetener.','Stir well. This Malabar-style spiced black tea is served after meals for digestion.']},
+// DINNER
+{id:70,name:'Beef Biriyani (Kerala Style)',e:'🍛',slot:'dinner',cui:'Kerala',veg:false,grp:'protein',cal:580,pro:36,crb:62,fat:20,fib:3,tags:['protein','carbs'],prep:70,ing:[{q:'500g',n:'Beef, cubed'},{q:'2 cups',n:'Jeerakasala / Basmati rice'},{q:'3',n:'Onions, deep fried'},{q:'2 tbsp',n:'Biriyani masala (Malabar style)'},{q:'1/2 cup',n:'Yogurt'},{q:'4 tbsp',n:'Ghee'},{q:'Few',n:'Mint leaves'}],steps:['Pressure cook beef with all spices, ginger-garlic, and yogurt for 5–6 whistles. Reduce gravy.','Parboil rice with whole spices until 70% done. Drain.','Layer beef gravy at bottom. Top with rice, fried onions, mint, ghee.','Seal pot with dough or foil. Dum cook on lowest flame 25 mins.','Mix gently from bottom to top. Serve with pappadam, raita, pickle, and Kerala lime chutney.']},
+{id:71,name:'Fish Moilee',e:'🐟',slot:'dinner',cui:'Kerala',veg:false,grp:'protein',cal:360,pro:30,crb:8,fat:20,fib:2,tags:['protein'],prep:25,ing:[{q:'400g',n:'Fish fillets (firm white fish)'},{q:'1.5 cups',n:'Coconut milk'},{q:'1',n:'Onion, sliced thin'},{q:'1 tsp',n:'Turmeric'},{q:'3',n:'Green chillies'},{q:'1',n:'Tomato, sliced'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Marinate fish with turmeric and salt 10 mins.','Sauté onion and green chilli in coconut oil until soft. Add turmeric.','Pour in thin coconut milk. Bring to gentle simmer.','Add fish. Cook 8 mins without stirring.','Add thick coconut milk and tomato. Simmer 3 mins. Do not boil after. Serve with appam.']},
+{id:72,name:'Mutton Stew',e:'🍲',slot:'dinner',cui:'Kerala',veg:false,grp:'protein',cal:480,pro:36,crb:18,fat:26,fib:3,tags:['protein'],prep:45,ing:[{q:'500g',n:'Mutton, curry cut'},{q:'2',n:'Potatoes, cubed'},{q:'1',n:'Onion, sliced'},{q:'1.5 cups',n:'Thick coconut milk'},{q:'1 inch',n:'Cinnamon'},{q:'4',n:'Cloves'},{q:'3',n:'Green chillies'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Pressure cook mutton with ginger-garlic, green chilli, salt and turmeric for 6–7 whistles.','Sauté onion with whole spices (cinnamon, cloves, cardamom) in coconut oil until soft.','Add potato and cooked mutton. Pour thin coconut milk. Cook 10 mins.','Add thick coconut milk. Simmer gently 5 mins.','Finish with curry leaves. Serve with appam, idiyappam, or Kerala parotta.']},
+{id:73,name:'Meen Pollichathu',e:'🐠',slot:'dinner',cui:'Kerala',veg:false,grp:'protein',cal:400,pro:34,crb:6,fat:24,fib:2,tags:['protein'],prep:40,ing:[{q:'2',n:'Pearl spot or pomfret, whole'},{q:'2 tbsp',n:'Red chilli powder'},{q:'1 tbsp',n:'Coriander powder'},{q:'Banana leaf',n:'For wrapping'},{q:'1',n:'Onion'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Score fish. Marinate in chilli, coriander, turmeric, salt, lemon 30 mins.','Pan fry fish 3 mins each side.','Make masala: sauté onion, tomato, green chilli until soft.','Place banana leaf on pan. Layer masala, fish, more masala. Wrap and fold leaf.','Cook 8 mins per side on low heat. Serve wrapped for dramatic presentation.']},
+{id:74,name:'Chemeen Curry (Prawn Curry)',e:'🦐',slot:'dinner',cui:'Kerala',veg:false,grp:'protein',cal:380,pro:30,crb:10,fat:20,fib:2,tags:['protein'],prep:30,ing:[{q:'400g',n:'Prawns, cleaned'},{q:'1 cup',n:'Coconut milk'},{q:'2 tbsp',n:'Red chilli powder'},{q:'1/2 tsp',n:'Turmeric'},{q:'1',n:'Kudampuli (fish tamarind)'},{q:'1',n:'Onion, sliced'},{q:'2 tbsp',n:'Coconut oil'}],steps:['Soak kudampuli in warm water. This gives the authentic sour taste.','Sauté shallots and green chilli in coconut oil. Add chilli and turmeric powders.','Add kudampuli with water. Bring to boil.','Add prawns. Cook 8–10 mins until prawns cooked through.','Add coconut milk. Simmer 3 mins. Drizzle raw coconut oil before serving.']},
+{id:75,name:'Kerala Egg Roast',e:'🥚',slot:'dinner',cui:'Kerala',veg:false,grp:'protein',cal:360,pro:20,crb:14,fat:24,fib:3,tags:['protein'],prep:25,ing:[{q:'6',n:'Eggs, hard-boiled'},{q:'3',n:'Onions, thinly sliced'},{q:'2',n:'Tomatoes, chopped'},{q:'2 tbsp',n:'Red chilli powder'},{q:'1 tsp',n:'Garam masala'},{q:'3 tbsp',n:'Coconut oil'},{q:'Few',n:'Curry leaves'}],steps:['Score boiled eggs. Shallow fry in coconut oil until golden. Set aside.','In same oil, add curry leaves, then sliced onion. Cook on medium-low 20 mins until deep brown and caramelised.','Add tomatoes, chilli powder, coriander, turmeric. Cook 8 mins.','Add fried eggs. Gently coat with masala. Cook 5 mins.','Finish with garam masala. Serve with Kerala parotta — this is the classic combo.']},
+{id:76,name:'Kappa Biriyani (Tapioca Biriyani)',e:'🥔',slot:'dinner',cui:'Kerala',veg:false,grp:'carbs',cal:460,pro:28,crb:54,fat:16,fib:5,tags:['carbs','protein'],prep:50,ing:[{q:'500g',n:'Tapioca (kappa), boiled and mashed'},{q:'300g',n:'Beef or chicken, cooked spicy'},{q:'2',n:'Onions, fried crispy'},{q:'1 tbsp',n:'Garam masala'},{q:'3 tbsp',n:'Coconut oil'}],steps:['Boil tapioca until soft. Mash roughly.','Cook beef or chicken with Kerala spices until dry.','Layer tapioca and meat in a vessel alternately.','Seal and heat on low 15 mins for flavours to meld.','Mix gently. Top with fried onions. A unique Malappuram specialty.']},
+{id:77,name:'Sardine Fry (Mathi Fry)',e:'🐟',slot:'dinner',cui:'Kerala',veg:false,grp:'protein',cal:320,pro:30,crb:4,fat:18,fib:1,tags:['protein'],prep:20,ing:[{q:'8',n:'Sardines, cleaned'},{q:'2 tbsp',n:'Red chilli powder'},{q:'1 tsp',n:'Turmeric'},{q:'1 tsp',n:'Coriander powder'},{q:'1 tbsp',n:'Lemon juice'},{q:'3 tbsp',n:'Coconut oil'}],steps:['Score sardines with 3 cuts on each side.','Mix chilli, turmeric, coriander, lemon, salt into a paste. Apply generously all over and inside fish.','Marinate 20 mins minimum.','Heat coconut oil in a flat pan on medium-high. Fry sardines 4–5 mins per side until crispy and cooked.','Serve with kappa, rice, or alone with sliced onion and green chilli.']},
+{id:78,name:'Beef Olathiyathu',e:'🥩',slot:'dinner',cui:'Kerala',veg:false,grp:'protein',cal:500,pro:40,crb:6,fat:32,fib:2,tags:['protein'],prep:50,ing:[{q:'500g',n:'Beef, small cubes'},{q:'2 tbsp',n:'Black pepper, coarsely ground'},{q:'1 tbsp',n:'Red chilli powder'},{q:'2',n:'Onions, sliced thin'},{q:'Few',n:'Curry leaves'},{q:'3 tbsp',n:'Coconut oil'},{q:'1 tsp',n:'Garam masala'}],steps:['Cook beef with pepper, chilli, turmeric, ginger-garlic paste in pressure cooker until tender (5–6 whistles).','Reduce any remaining water on high heat.','Heat coconut oil. Fry sliced onion and curry leaves until very deep brown and crispy.','Add beef. Fry on high heat, stirring, until edges become dark and slightly crispy.','Finish with garam masala and raw coconut oil. The crispy edges are what makes this special.']},
+];
+
+const FRUITS=[
+  {name:'Mango',e:'🥭',cal:99,fib:2.6,vit:'C, A',season:[3,4,5,6],note:'King of fruits. Rich in Vitamin C and beta-carotene.'},
+  {name:'Banana',e:'🍌',cal:89,fib:2.6,vit:'B6, C',season:[1,2,3,4,5,6,7,8,9,10,11,12],note:'Year-round. Great potassium source and quick energy.'},
+  {name:'Apple',e:'🍎',cal:52,fib:2.4,vit:'C',season:[9,10,11,12,1],note:'High in fibre and antioxidants.'},
+  {name:'Watermelon',e:'🍉',cal:30,fib:0.4,vit:'C, A',season:[3,4,5,6],note:'95% water. Perfect for summer hydration.'},
+  {name:'Orange',e:'🍊',cal:47,fib:2.4,vit:'C',season:[11,12,1,2],note:'Immunity booster. Excellent Vitamin C source.'},
+  {name:'Pomegranate',e:'🍎',cal:83,fib:4,vit:'C, K',season:[9,10,11,12],note:'Rich in antioxidants and iron.'},
+  {name:'Guava',e:'🍐',cal:68,fib:5.4,vit:'C, A',season:[10,11,12,1,2],note:'More Vitamin C than oranges. High in fibre.'},
+  {name:'Papaya',e:'🧡',cal:43,fib:1.7,vit:'C, A',season:[2,3,4,5],note:'Aids digestion with papain enzyme.'},
+  {name:'Strawberry',e:'🍓',cal:32,fib:2,vit:'C',season:[12,1,2],note:'Low calorie, high antioxidants.'},
+  {name:'Grapes',e:'🍇',cal:67,fib:0.9,vit:'C, K',season:[10,11,12],note:'Rich in resveratrol. Great for heart health.'},
+  {name:'Pear',e:'🍐',cal:57,fib:3.1,vit:'C, K',season:[8,9,10],note:'High fibre, gentle on digestion.'},
+  {name:'Plum',e:'🟣',cal:46,fib:1.4,vit:'C, K',season:[6,7,8],note:'Good for bone health.'},
+  {name:'Peach',e:'🍑',cal:39,fib:1.5,vit:'C, A',season:[6,7,8],note:'Low calorie, great for skin.'},
+  {name:'Pineapple',e:'🍍',cal:50,fib:1.4,vit:'C, B1',season:[3,4,5,6],note:'Contains bromelain which aids digestion.'},
+  {name:'Jackfruit',e:'🟡',cal:95,fib:1.5,vit:'C, B6',season:[3,4,5,6],note:'Largest tree fruit. High in potassium.'},
+  {name:'Coconut',e:'🥥',cal:354,fib:9,vit:'Minerals',season:[1,2,3,4,5,6,7,8,9,10,11,12],note:'Coconut water is an excellent electrolyte drink.'},
+  {name:'Jamun',e:'🫐',cal:62,fib:0.6,vit:'C',season:[6,7,8],note:'Excellent for blood sugar control.'},
+  {name:'Litchi',e:'🫒',cal:66,fib:1.3,vit:'C',season:[5,6],note:'Brief summer season. Rich in Vitamin C.'},
+  {name:'Kiwi',e:'🥝',cal:61,fib:3,vit:'C, K',season:[11,12,1,2],note:'More Vitamin C than oranges per serving.'},
+  {name:'Blueberry',e:'🫐',cal:57,fib:2.4,vit:'C, K',season:[12,1,2],note:'Highest antioxidant content of any fruit.'},
+  {name:'Amla',e:'🟢',cal:44,fib:4.3,vit:'C',season:[10,11,12,1,2],note:'Richest natural source of Vitamin C.'},
+  {name:'Chikoo',e:'🟤',cal:83,fib:5.3,vit:'C, A',season:[10,11,12,1,2],note:'Naturally sweet. High in fibre.'},
+];
+
+const SLOTS=['breakfast','lunch','snack','dinner'];
+const SLBL={breakfast:'🌅 Breakfast',lunch:'☀️ Lunch',snack:'🍎 Snack',dinner:'🌙 Dinner'};
+const INGR=['mushroom','onion','garlic','ginger','chilli','coconut','dairy','gluten','egg','chicken','fish','paneer','tofu','peanut','cashew','potato'];
+const MONTHS=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// ═══ STATE ═══
+let S={meals:{},ratings:{},dislikes:[],chat:[],geminiKey:'',pexelsKey:'',bookFilter:'all',customDishes:[],swipeSlot:'dinner'};
+const IMG_CACHE={};
+let deferredInstall=null;
+
+function allDishes(){return[...DB,...S.customDishes]}
+function save(){try{localStorage.setItem('ce4',JSON.stringify(S))}catch(e){}}
+function load(){
+  try{const r=localStorage.getItem('ce4');if(r){const p=JSON.parse(r);S={...S,...p};}}catch(e){}
+  const today=new Date().toDateString();
+  if(localStorage.getItem('ce_day4')!==today){S.meals={};S.ratings={};localStorage.setItem('ce_day4',today);save()}
+  const gk=document.getElementById('gemini-key');if(gk&&S.geminiKey)gk.value=S.geminiKey;
+  const pk=document.getElementById('pexels-key');if(pk&&S.pexelsKey)pk.value=S.pexelsKey;
+}
+
+function byId(id){return allDishes().find(f=>f.id===id)}
+function forSlot(slot){
+  return allDishes().filter(f=>f.slot===slot&&!S.dislikes.some(d=>
+    (f.ing&&f.ing.some(i=>i.n.toLowerCase().includes(d)))||f.name.toLowerCase().includes(d)));
+}
+function randFood(slot){
+  const pool=forSlot(slot);
+  if(!pool.length)return allDishes().find(f=>f.slot===slot)||DB[0];
+  const hi=pool.filter(f=>S.ratings[f.id]>=4);
+  const base=pool.filter(f=>!S.ratings[f.id]||(S.ratings[f.id]>=3));
+  const combined=[...base,...base,...hi];
+  return combined[Math.floor(Math.random()*combined.length)]||pool[0];
+}
+function randomAll(){
+  SLOTS.forEach(s=>{S.meals[s]=randFood(s).id});
+  save();renderHome();showToast('🎲 New meals picked!');
+}
+function randSlot(slot){S.meals[slot]=randFood(slot).id;save();renderHome();showToast('🔄 Changed!')}
+function saveGemini(){S.geminiKey=document.getElementById('gemini-key').value.trim();save();showToast('🤖 Gemini key saved!')}
+function savePexels(){S.pexelsKey=document.getElementById('pexels-key').value.trim();save();loadCardImages();showToast('📸 Pexels key saved! Loading images...')}
+function totals(){
+  let c=0,p=0,cr=0,f=0,fb=0;
+  SLOTS.forEach(s=>{const d=byId(S.meals[s]);if(d){c+=d.cal;p+=d.pro;cr+=d.crb;f+=d.fat;fb+=d.fib}});
+  return{c,p,cr,f,fb};
+}
+function coveredGroups(){const g=new Set();SLOTS.forEach(s=>{const d=byId(S.meals[s]);if(d)d.tags.forEach(t=>g.add(t))});return g}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500)}
+
+// ═══ FREE IMAGES: Pexels (primary, free forever) + TheMealDB (fallback, no key) ═══
+async function getDishImg(name){
+  if(IMG_CACHE[name])return IMG_CACHE[name];
+  // 1. Pexels — free API, no daily limit, best quality
+  const pk=S.pexelsKey||'';
+  if(pk){
+    try{
+      const q=encodeURIComponent(name+' food dish');
+      const r=await fetch('https://api.pexels.com/v1/search?query='+q+'&per_page=3&orientation=landscape',
+        {headers:{Authorization:pk}});
+      const d=await r.json();
+      if(d.photos&&d.photos.length){
+        const idx=Math.floor(Math.random()*Math.min(3,d.photos.length));
+        const url=d.photos[idx].src.medium;
+        IMG_CACHE[name]=url;return url;
+      }
+    }catch(e){}
+  }
+  // 2. TheMealDB — free, no key needed, food-specific database
+  try{
+    const q=encodeURIComponent(name.split(' ').slice(0,2).join(' '));
+    const r=await fetch('https://www.themealdb.com/api/json/v1/1/search.php?s='+q);
+    const d=await r.json();
+    if(d.meals&&d.meals[0]){
+      IMG_CACHE[name]=d.meals[0].strMealThumb;
+      return IMG_CACHE[name];
+    }
+  }catch(e){}
+  return null;
+}
+
+async function loadCardImages(){
+  for(const slot of SLOTS){
+    const f=byId(S.meals[slot]);if(!f)continue;
+    if(f.photo){
+      const el=document.getElementById('mc-img-'+slot);
+      if(el)el.innerHTML='<img src="'+f.photo+'" style="width:100%;height:130px;object-fit:cover;display:block" loading="lazy">';
+      continue;
+    }
+    const url=await getDishImg(f.name);if(!url)continue;
+    const el=document.getElementById('mc-img-'+slot);
+    if(el)el.innerHTML='<img src="'+url+'" style="width:100%;height:130px;object-fit:cover;display:block" loading="lazy">';
+  }
+}
+
+// ═══ TODAY ═══
+function renderHome(){
+  const h=new Date().getHours();
+  const ns=h<9?'breakfast':h<13?'lunch':h<17?'snack':'dinner';
+  const nf=byId(S.meals[ns]);
+  document.getElementById('notif-area').innerHTML=nf?
+    '<div class="notif"><span class="ico">🔔</span><div><div class="ttl">'+SLBL[ns]+' coming up</div><div class="sub">'+nf.name+' · '+nf.prep+' min prep · '+nf.cal+' kcal for 2</div></div></div>':'';
+
+  document.getElementById('meals-area').innerHTML=SLOTS.map(slot=>{
+    const f=byId(S.meals[slot]);if(!f)return'';
+    const r=S.ratings[f.id]||0;
+    const stars=[1,2,3,4,5].map(n=>'<span class="star'+(n<=r?' on':'')+'" onclick="rate('+f.id+','+n+')">'+(n<=r?'★':'☆')+'</span>').join('');
+    const bdg=f.tags.map(t=>'<span class="badge b'+t[0]+'">'+t+'</span>').join('');
+    const isCustom=f.id>10000;
+    return '<div class="mc">'+
+      '<div class="mc-img" id="mc-img-'+slot+'">'+f.e+
+        '<div class="mc-tags"><span class="mc-cui">'+f.cui+'</span>'+
+        '<span class="mc-cui" style="'+(f.veg?'color:#16a34a':'color:#dc2626')+'">'+
+        (f.veg?'V':'N')+'</span>'+(isCustom?'<span class="mc-cui" style="color:#7C3AED">Custom</span>':'')+'</div></div>'+
+      '<div class="mc-body">'+
+        '<div class="mc-slot">'+SLBL[slot]+'</div>'+
+        '<div class="mc-name">'+f.name+'</div>'+
+        '<div class="mc-meta">'+f.cui+' · '+f.prep+' min · '+f.cal+' kcal for 2</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">'+bdg+'</div>'+
+        '<div class="macros">'+
+          '<div class="mc2"><div class="v">'+f.pro+'g</div><div class="l">Protein</div></div>'+
+          '<div class="mc2"><div class="v">'+f.crb+'g</div><div class="l">Carbs</div></div>'+
+          '<div class="mc2"><div class="v">'+f.fat+'g</div><div class="l">Fat</div></div>'+
+          '<div class="mc2"><div class="v">'+f.fib+'g</div><div class="l">Fibre</div></div>'+
+        '</div>'+
+        '<div class="mc-actions">'+
+          '<button class="btn btn-g btn-s" onclick="randSlot(\''+slot+'\')">🎲 Change</button>'+
+          '<button class="btn-recipe" onclick="showRecipe('+f.id+')">📖 Recipe</button>'+
+          '<div class="stars" style="margin-left:auto">'+stars+'</div>'+
+        '</div>'+
+      '</div></div>';
+  }).join('');
+  loadCardImages();
+  document.getElementById('dish-count').textContent=(DB.length+S.customDishes.length);
+}
+
+function rate(dishId,n){S.ratings[dishId]=n;save();renderHome();showToast(n>=4?'⭐ More like this coming!':n<=2?'👎 Less of this next time':'✓ Rated')}
+
+// ═══ TINDER SWIPE ═══
+let currentSwipeDish=null;
+let swipeDishQueue=[];
+let swipeStartX=0,swipeStartY=0,swipeCurX=0,isDragging=false;
+
+function initSwipe(){
+  const slot=S.swipeSlot;
+  document.getElementById('swipe-slot-pills').innerHTML=
+    [...SLOTS,'random'].map(s=>'<button class="slot-pill'+(s===slot?' on':'')+'" onclick="setSwipeSlot(\''+s+'\')">'+
+    (s==='random'?'🎲 Random':SLBL[s]||s)+'</button>').join('');
+  buildSwipeQueue();
+  showNextSwipeCard();
+}
+
+function setSwipeSlot(slot){
+  S.swipeSlot=slot;save();
+  document.querySelectorAll('.slot-pill').forEach(p=>p.classList.remove('on'));
+  event.target.classList.add('on');
+  buildSwipeQueue();showNextSwipeCard();
+}
+
+function buildSwipeQueue(){
+  const slot=S.swipeSlot==='random'?SLOTS[Math.floor(Math.random()*4)]:S.swipeSlot;
+  const pool=forSlot(slot);
+  swipeDishQueue=[...pool].sort(()=>Math.random()-.5);
+  if(!swipeDishQueue.length)swipeDishQueue=[...allDishes().filter(f=>f.slot===slot)];
+}
+
+function showNextSwipeCard(){
+  if(!swipeDishQueue.length){buildSwipeQueue();}
+  if(!swipeDishQueue.length)return;
+  currentSwipeDish=swipeDishQueue.shift();
+  const f=currentSwipeDish;
+  const card=document.getElementById('swipe-card');
+  card.className='swipe-card';
+  card.style.transform='';
+  document.getElementById('swipe-emoji').textContent=f.e;
+  document.getElementById('sw-slot').textContent=SLBL[f.slot];
+  document.getElementById('sw-name').textContent=f.name;
+  document.getElementById('sw-meta').textContent=f.cui+' · '+(f.veg?'🌱 Veg':'🍖 Non-veg')+' · '+f.prep+' min · '+f.cal+' kcal for 2';
+  document.getElementById('sw-badges').innerHTML=f.tags.map(t=>'<span class="badge b'+t[0]+'">'+t+'</span>').join('');
+  document.getElementById('sw-macros').innerHTML=
+    '<div class="sm"><div class="v">'+f.pro+'g</div><div class="l">Protein</div></div>'+
+    '<div class="sm"><div class="v">'+f.crb+'g</div><div class="l">Carbs</div></div>'+
+    '<div class="sm"><div class="v">'+f.fat+'g</div><div class="l">Fat</div></div>'+
+    '<div class="sm"><div class="v">'+f.fib+'g</div><div class="l">Fibre</div></div>';
+  document.getElementById('ol-yes').style.opacity='0';
+  document.getElementById('ol-no').style.opacity='0';
+  // Load image
+  const imgDiv=document.getElementById('swipe-img');
+  if(f.photo){
+    imgDiv.innerHTML='<img src="'+f.photo+'" style="width:100%;height:200px;object-fit:cover;display:block">';
+  } else {
+    imgDiv.innerHTML='<span id="swipe-emoji">'+f.e+'</span>';
+    getDishImg(f.name).then(url=>{
+      if(url)imgDiv.innerHTML='<img src="'+url+'" style="width:100%;height:200px;object-fit:cover;display:block">';
+    });
+  }
+  setupSwipeDrag();
+}
+
+function setupSwipeDrag(){
+  const card=document.getElementById('swipe-card');
+  // Touch
+  card.addEventListener('touchstart',onDragStart,{passive:true,once:true});
+  card.addEventListener('touchmove',onDragMove,{passive:true});
+  card.addEventListener('touchend',onDragEnd,{once:true});
+  // Mouse
+  card.addEventListener('mousedown',onDragStart,{once:true});
+  document.addEventListener('mousemove',onDragMove);
+  document.addEventListener('mouseup',onDragEnd,{once:true});
+}
+
+function getX(e){return e.touches?e.touches[0].clientX:e.clientX}
+function getY(e){return e.touches?e.touches[0].clientY:e.clientY}
+
+function onDragStart(e){
+  isDragging=true;
+  swipeStartX=getX(e);swipeStartY=getY(e);
+  document.getElementById('swipe-card').classList.add('dragging');
+}
+function onDragMove(e){
+  if(!isDragging)return;
+  swipeCurX=getX(e)-swipeStartX;
+  const rot=swipeCurX*0.08;
+  document.getElementById('swipe-card').style.transform='translateX('+swipeCurX+'px) rotate('+rot+'deg)';
+  const ratio=Math.abs(swipeCurX)/150;
+  if(swipeCurX>0){
+    document.getElementById('ol-yes').style.opacity=Math.min(ratio,1);
+    document.getElementById('ol-no').style.opacity=0;
+  } else {
+    document.getElementById('ol-no').style.opacity=Math.min(ratio,1);
+    document.getElementById('ol-yes').style.opacity=0;
+  }
+}
+function onDragEnd(){
+  if(!isDragging)return;
+  isDragging=false;
+  document.getElementById('swipe-card').classList.remove('dragging');
+  document.removeEventListener('mousemove',onDragMove);
+  if(swipeCurX>80)doSwipe('right');
+  else if(swipeCurX<-80)doSwipe('left');
+  else{
+    document.getElementById('swipe-card').style.transition='transform .3s ease';
+    document.getElementById('swipe-card').style.transform='translateX(0) rotate(0deg)';
+    setTimeout(()=>{document.getElementById('swipe-card').style.transition='';},300);
+  }
+  swipeCurX=0;
+}
+
+function doSwipe(dir){
+  const card=document.getElementById('swipe-card');
+  const f=currentSwipeDish;
+  card.classList.add(dir==='right'?'animate-out-right':'animate-out-left');
+  if(dir==='right'){
+    // Lock into today's plan for this slot
+    S.meals[f.slot]=f.id;
+    save();renderHome();
+    // "Match" animation
+    document.getElementById('match-dish-name').textContent=f.e+' '+f.name;
+    document.getElementById('match-bang').classList.add('on');
+  }
+  setTimeout(()=>{showNextSwipeCard()},350);
+}
+function closeMatch(){document.getElementById('match-bang').classList.remove('on')}
+
+// ═══ RECIPE BOOK ═══
+const BOOK_FILTERS=[
+  {id:'all',label:'All'},
+  {id:'veg',label:'🌱 Veg'},
+  {id:'nonveg',label:'🍖 Non-veg'},
+  {id:'custom',label:'⭐ My dishes'},
+  {id:'breakfast',label:'🌅 Breakfast'},
+  {id:'lunch',label:'☀️ Lunch'},
+  {id:'snack',label:'🍎 Snack'},
+  {id:'dinner',label:'🌙 Dinner'},
+  {id:'South Indian',label:'South Indian'},
+  {id:'Indian',label:'Indian'},
+  {id:'Mexican',label:'🌮 Mexican'},
+  {id:'Chinese',label:'🥢 Chinese'},
+  {id:'Italian',label:'🍝 Italian'},
+  {id:'Continental',label:'Continental'},
+  {id:'Mediterranean',label:'Mediterranean'},
+  {id:'Kerala',label:'🌴 Kerala'},
+];
+
+function renderBook(){
+  document.getElementById('book-filters').innerHTML=BOOK_FILTERS.map(f=>
+    '<button class="fchip'+(S.bookFilter===f.id?' on':'')+'" onclick="setBookFilter(\''+f.id+'\')">'+f.label+'</button>').join('');
+  let filtered=allDishes();
+  const bf=S.bookFilter;
+  if(bf==='veg')filtered=filtered.filter(f=>f.veg);
+  else if(bf==='nonveg')filtered=filtered.filter(f=>!f.veg);
+  else if(bf==='custom')filtered=S.customDishes;
+  else if(['breakfast','lunch','snack','dinner'].includes(bf))filtered=filtered.filter(f=>f.slot===bf);
+  else if(bf!=='all')filtered=filtered.filter(f=>f.cui===bf);
+  document.getElementById('book-list').innerHTML=filtered.length?filtered.map(f=>
+    '<div class="rb-card" onclick="showRecipe('+f.id+')">'+
+    '<div class="rb-emoji">'+f.e+'</div>'+
+    '<div class="rb-info">'+
+      '<div class="rb-name">'+f.name+(f.id>10000?' <span class="custom-badge">Custom</span>':'')+'</div>'+
+      '<div class="rb-meta">'+f.cui+' · '+SLBL[f.slot]+' · '+f.prep+' min</div>'+
+    '</div>'+
+    '<div class="rb-right">'+
+      '<div class="rb-cal">'+f.cal+'</div>'+
+      '<div style="font-size:9px;color:var(--mut)">kcal</div>'+
+      '<div class="rv '+(f.veg?'veg':'non')+'">'+(f.veg?'V':'N')+'</div>'+
+    '</div></div>').join(''):'<div style="text-align:center;padding:40px;color:var(--mut)">No dishes here yet</div>';
+}
+function setBookFilter(f){S.bookFilter=f;save();renderBook()}
+
+// ═══ RECIPE MODAL ═══
+function showRecipe(id){
+  const f=allDishes().find(d=>d.id===id);if(!f)return;
+  const vdot=f.veg?'<span style="color:#16a34a;font-weight:600">🌱 Vegetarian</span>':'<span style="color:#dc2626;font-weight:600">🍖 Non-vegetarian</span>';
+  const ings=f.ing&&f.ing.length?f.ing.map(i=>'<div class="ing-item"><span class="qty">'+i.q+'</span><span>'+i.n+'</span></div>').join(''):'<p style="color:var(--mut);font-size:13px">No ingredients listed</p>';
+  const stps=f.steps&&f.steps.length?f.steps.map((s,i)=>'<div class="step-item"><div class="step-num">'+(i+1)+'</div><div class="step-text">'+s+'</div></div>').join(''):'<p style="color:var(--mut);font-size:13px">No steps listed</p>';
+  const imgHtml=f.photo?'<img src="'+f.photo+'" style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:14px">':'';
+  document.getElementById('modal-body').innerHTML=
+    '<div class="modal-title">'+f.e+' '+f.name+'</div>'+
+    '<div class="modal-sub">'+f.cui+' · '+f.prep+' min · '+f.cal+' kcal for 2 · '+vdot+(f.id>10000?' · <span style="color:#7C3AED;font-weight:600">Your custom dish</span>':'')+'</div>'+
+    imgHtml+
+    '<div class="macros" style="margin-bottom:16px">'+
+      '<div class="mc2"><div class="v">'+f.pro+'g</div><div class="l">Protein</div></div>'+
+      '<div class="mc2"><div class="v">'+f.crb+'g</div><div class="l">Carbs</div></div>'+
+      '<div class="mc2"><div class="v">'+f.fat+'g</div><div class="l">Fat</div></div>'+
+      '<div class="mc2"><div class="v">'+f.fib+'g</div><div class="l">Fibre</div></div>'+
+    '</div>'+
+    '<div class="recipe-section"><h4>Ingredients (serves 2)</h4><div class="ing-list">'+ings+'</div></div>'+
+    '<div class="recipe-section"><h4>Steps</h4><div class="step-list">'+stps+'</div></div>'+
+    (f.id>10000?'<button class="btn btn-g" style="width:100%;margin-top:8px;color:var(--red)" onclick="deleteCustomDish('+f.id+');closeModal()">🗑 Delete this dish</button>':'');
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal(e){if(!e||e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('on')}
+
+// ═══ FRUITS ═══
+function renderFruits(){
+  const m=new Date().getMonth()+1;
+  document.getElementById('month-banner').innerHTML='<strong>🌸 '+MONTHS[m]+' seasonal fruits</strong>Fresh and affordable right now!';
+  const seasonal=FRUITS.filter(f=>f.season.includes(m));
+  const all=[...FRUITS].sort((a,b)=>a.name.localeCompare(b.name));
+  const fc=(f,s)=>'<div class="fruit-card'+(s?' season':'')+'" onclick="showFruitInfo(\''+f.name+'\')">'+
+    '<div class="fe">'+f.e+'</div><div class="fn">'+f.name+'</div>'+
+    '<div class="fm">'+f.cal+' kcal/100g</div>'+
+    '<div class="fm" style="color:var(--s)">Vit '+f.vit+'</div>'+
+    (s?'<div class="fs">★ In season</div>':'')+'</div>';
+  document.getElementById('seasonal-grid').innerHTML=seasonal.map(f=>fc(f,true)).join('');
+  document.getElementById('all-fruits-grid').innerHTML=all.map(f=>fc(f,f.season.includes(m))).join('');
+}
+function showFruitInfo(name){
+  const f=FRUITS.find(fr=>fr.name===name);if(!f)return;
+  const seasons=f.season.map(s=>MONTHS[s]).join(', ');
+  document.getElementById('modal-body').innerHTML=
+    '<div class="modal-title">'+f.e+' '+f.name+'</div>'+
+    '<div class="modal-sub">Season: '+seasons+' · '+f.cal+' kcal per 100g</div>'+
+    '<div class="macros" style="margin-bottom:16px">'+
+      '<div class="mc2"><div class="v">'+f.cal+'</div><div class="l">kcal</div></div>'+
+      '<div class="mc2"><div class="v">'+f.fib+'g</div><div class="l">Fibre</div></div>'+
+      '<div class="mc2"><div class="v">Vit '+f.vit+'</div><div class="l">Vitamins</div></div>'+
+    '</div>'+
+    '<div class="recipe-section"><h4>About</h4><p style="font-size:14px;line-height:1.7">'+f.note+'</p></div>'+
+    '<div class="recipe-section"><h4>Best ways to eat</h4><div class="ing-list">'+
+      '<div class="ing-item"><span class="qty">Fresh</span><span>Eat as-is for max nutrients</span></div>'+
+      '<div class="ing-item"><span class="qty">Smoothie</span><span>Blend with milk or yogurt</span></div>'+
+      '<div class="ing-item"><span class="qty">Chaat</span><span>Toss with spices and lemon</span></div>'+
+      '<div class="ing-item"><span class="qty">Breakfast</span><span>Top oats, yogurt, or cereal</span></div>'+
+    '</div></div>';
+  document.getElementById('modal').classList.add('on');
+}
+
+// ═══ NUTRITION ═══
+function renderNut(){
+  const t=totals();
+  document.getElementById('nut-tots').innerHTML=
+    '<div class="nut-b"><div class="v">'+t.c+'</div><div class="l">kcal</div></div>'+
+    '<div class="nut-b"><div class="v">'+t.p+'g</div><div class="l">Protein</div></div>'+
+    '<div class="nut-b"><div class="v">'+t.cr+'g</div><div class="l">Carbs</div></div>'+
+    '<div class="nut-b"><div class="v">'+t.f+'g</div><div class="l">Fat</div></div>'+
+    '<div class="nut-b"><div class="v">'+t.fb+'g</div><div class="l">Fibre</div></div>'+
+    '<div class="nut-b"><div class="v">'+SLOTS.filter(s=>S.meals[s]).length+'/4</div><div class="l">Meals</div></div>';
+  const tgts={Calories:[t.c,3600,'#FF6B35'],Protein:[t.p,160,'#2EC4B6'],Carbs:[t.cr,440,'#F59E0B'],Fat:[t.f,100,'#8B5CF6'],Fibre:[t.fb,50,'#10B981']};
+  document.getElementById('progs').innerHTML=Object.entries(tgts).map(([k,[v,mx,c]])=>{
+    const pct=Math.min(100,Math.round(v/mx*100));
+    return '<div class="prog-row"><div class="prog-lbl"><span>'+k+'</span><span>'+v+' / '+mx+(k==='Calories'?' kcal':'g')+'</span></div>'+
+      '<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:'+c+'"></div></div></div>';
+  }).join('');
+  const cov=coveredGroups();
+  const grps=[{id:'carbs',e:'🌾',n:'Carbs'},{id:'protein',e:'🥩',n:'Protein'},{id:'veggie',e:'🥦',n:'Veggies'},{id:'fruit',e:'🍑',n:'Fruits'}];
+  document.getElementById('grp-grid').innerHTML=grps.map(g=>
+    '<div class="grp-card '+(cov.has(g.id)?'ok':'ms')+'">'+
+    '<div class="e">'+g.e+'</div><div class="n">'+g.n+'</div>'+
+    '<div class="s">'+(cov.has(g.id)?'✓ Covered':'⚠ Missing')+'</div></div>').join('');
+  document.getElementById('meal-bk').innerHTML=SLOTS.map(slot=>{
+    const f=byId(S.meals[slot]);if(!f)return'';
+    return '<div class="card" style="padding:13px;cursor:pointer" onclick="showRecipe('+f.id+')">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">'+
+      '<div><div style="font-weight:600;font-size:14px">'+SLBL[slot]+'</div><div style="font-size:12px;color:var(--mut)">'+f.e+' '+f.name+'</div></div>'+
+      '<div style="font-size:16px;font-weight:700;color:var(--p)">'+f.cal+' kcal</div></div>'+
+      '<div class="macros" style="margin:0">'+
+        '<div class="mc2"><div class="v">'+f.pro+'g</div><div class="l">Protein</div></div>'+
+        '<div class="mc2"><div class="v">'+f.crb+'g</div><div class="l">Carbs</div></div>'+
+        '<div class="mc2"><div class="v">'+f.fat+'g</div><div class="l">Fat</div></div>'+
+        '<div class="mc2"><div class="v">'+f.fib+'g</div><div class="l">Fibre</div></div>'+
+      '</div></div>';
+  }).join('');
+}
+
+// ═══ CUSTOM DISH ═══
+function previewPhoto(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const preview=document.getElementById('cd-preview');
+    preview.src=e.target.result;preview.style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveCustomDish(){
+  const name=document.getElementById('cd-name').value.trim();
+  if(!name){showToast('Please enter a dish name');return;}
+  const veg=document.querySelector('input[name="cd-veg"]:checked').value==='veg';
+  const ingText=document.getElementById('cd-ing').value.trim();
+  const stepsText=document.getElementById('cd-steps').value.trim();
+  const photo=document.getElementById('cd-preview').src;
+  const dish={
+    id:Date.now(),
+    name,
+    e:'🍳',
+    slot:document.getElementById('cd-slot').value,
+    cui:document.getElementById('cd-cui').value,
+    veg,
+    grp:'protein',
+    cal:parseInt(document.getElementById('cd-cal').value)||0,
+    pro:parseInt(document.getElementById('cd-pro').value)||0,
+    crb:parseInt(document.getElementById('cd-crb').value)||0,
+    fat:parseInt(document.getElementById('cd-fat').value)||0,
+    fib:parseInt(document.getElementById('cd-fib').value)||0,
+    tags:veg?['protein','veggie']:['protein'],
+    prep:parseInt(document.getElementById('cd-prep').value)||30,
+    ing:ingText?ingText.split('\n').filter(Boolean).map(l=>({q:'',n:l.trim()})):[],
+    steps:stepsText?stepsText.split('\n').filter(l=>l.trim()).map(l=>l.replace(/^\d+\.\s*/,'')):[],
+    photo:photo&&photo.startsWith('data:')?photo:null,
+    custom:true,
+  };
+  S.customDishes.push(dish);save();
+  showToast('🎉 '+name+' added to your recipes!');
+  // Clear form
+  ['cd-name','cd-cal','cd-pro','cd-crb','cd-fat','cd-fib','cd-ing','cd-steps'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('cd-preview').style.display='none';
+  document.getElementById('dish-count').textContent=(DB.length+S.customDishes.length);
+}
+
+function deleteCustomDish(id){
+  S.customDishes=S.customDishes.filter(d=>d.id!==id);
+  save();showToast('Dish removed');renderBook();
+  document.getElementById('dish-count').textContent=(DB.length+S.customDishes.length);
+}
+
+// ═══ CHAT (Gemini) ═══
+function renderChat(){
+  const c=document.getElementById('chat-msgs');
+  const hasKey=!!S.geminiKey;
+  if(!S.chat.length){
+    c.innerHTML='<div class="bub bub-a">Hey! 👋 I\'m your CoupleEats helper. I know all '+(DB.length+S.customDishes.length)+' dishes. Tell me dislikes, ask to change meals, or say "make dinner Mexican"!'+(hasKey?'':' Add your free Gemini key in Settings to unlock AI chat.')+'</div>';
+  } else {
+    c.innerHTML=S.chat.map(m=>'<div class="bub bub-'+(m.r==='u'?'u':'a')+'">'+m.c+'</div>').join('');
+  }
+  c.scrollTop=c.scrollHeight;
+  const chips=['Make dinner Mexican','Veg dinner tonight','Skip mushrooms','Random snack','High protein meals','Italian tonight'];
+  document.getElementById('chips').innerHTML=chips.map((t,i)=>'<button class="chip" onclick="quickChip('+i+')">'+t+'</button>').join('');
+}
+const _chips=['Make dinner Mexican','Veg dinner tonight','Skip mushrooms','Random snack','High protein meals','Italian tonight'];
+function quickChip(i){document.getElementById('cin').value=_chips[i];sendChat()}
+
+async function sendChat(){
+  const inp=document.getElementById('cin');
+  const msg=inp.value.trim();if(!msg)return;
+  inp.value='';
+  S.chat.push({r:'u',c:msg});save();renderChat();
+  const low=msg.toLowerCase();
+
+  // Local actions — always work even without API key
+  if(/don.t like|hate|avoid|dislike|allergic/.test(low)){
+    const words=(msg.match(/\b\w{4,}\b/g)||[]).filter(w=>!['dont','hate','like','skip','avoid','dislike','really','very'].includes(w.toLowerCase()));
+    words.forEach(w=>{if(!S.dislikes.includes(w.toLowerCase()))S.dislikes.push(w.toLowerCase())});
+    renderDislikes();
+  }
+  if(/mexican/.test(low)){const d=allDishes().find(f=>f.slot==='dinner'&&f.cui==='Mexican');if(d){S.meals.dinner=d.id;save();renderHome();}}
+  if(/chinese/.test(low)){const d=allDishes().find(f=>f.slot==='dinner'&&f.cui==='Chinese');if(d){S.meals.dinner=d.id;save();renderHome();}}
+  if(/italian/.test(low)){const d=allDishes().find(f=>f.slot==='dinner'&&f.cui==='Italian');if(d){S.meals.dinner=d.id;save();renderHome();}}
+  if(/veg.*dinner|vegetarian.*dinner/.test(low)){const d=allDishes().find(f=>f.slot==='dinner'&&f.veg);if(d){S.meals.dinner=d.id;save();renderHome();}}
+  if(/random|surprise/.test(low))randomAll();
+
+  const c=document.getElementById('chat-msgs');
+  const tid='ty'+Date.now();
+  c.innerHTML+='<div class="bub bub-a" id="'+tid+'"><div class="typing"><span></span><span></span><span></span></div></div>';
+  c.scrollTop=c.scrollHeight;
+
+  if(!S.geminiKey){
+    setTimeout(()=>{
+      document.getElementById(tid)&&document.getElementById(tid).remove();
+      let rep='Got it! ';
+      if(/hate|avoid|dislike/.test(low))rep+='Noted your preference — avoiding those ingredients.';
+      else if(/mexican/.test(low))rep+='Switched dinner to a Mexican dish! 🌮';
+      else if(/random/.test(low))rep+='Randomised all meals! 🎲';
+      else if(/recipe|how/.test(low))rep+='Tap the 📖 Recipe button on any meal card to see full steps!';
+      else rep+='Add your free Gemini key in Settings → AI Chat for full responses!';
+      S.chat.push({r:'a',c:rep});save();renderChat();
+    },600);
+    return;
+  }
+
+  try{
+    const today=SLOTS.map(s=>{const f=byId(S.meals[s]);return f?s+': '+f.name:''}).filter(Boolean).join(', ');
+    const sys='You are CoupleEats, a friendly meal planner for a couple (South Indian but they enjoy world cuisines). Today: '+today+'. Dislikes: '+(S.dislikes.join(',')||'none')+'. Reply in 2–3 sentences max. Be warm, specific and helpful.';
+    const msgs=S.chat.slice(-8).map(m=>({role:m.r==='u'?'user':'model',parts:[{text:m.c}]}));
+    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+S.geminiKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:msgs})
+    });
+    const d=await res.json();
+    document.getElementById(tid)&&document.getElementById(tid).remove();
+    const reply=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0].text)||'I had trouble with that. Try again!';
+    S.chat.push({r:'a',c:reply});save();renderChat();
+  }catch(e){
+    document.getElementById(tid)&&document.getElementById(tid).remove();
+    S.chat.push({r:'a',c:'Offline right now — tap 📖 on any meal for the full recipe!'});
+    save();renderChat();
+  }
+}
+document.getElementById('cin').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
+
+// ═══ SETTINGS ═══
+function renderDislikes(){
+  document.getElementById('dis-tags').innerHTML=INGR.map(i=>
+    '<span class="tag'+(S.dislikes.includes(i)?' no':'')+'" onclick="toggleDis(\''+i+'\')">'+i+'</span>').join('');
+}
+function toggleDis(item){
+  S.dislikes=S.dislikes.includes(item)?S.dislikes.filter(d=>d!==item):[...S.dislikes,item];
+  save();renderDislikes();renderHome();
+  showToast(S.dislikes.includes(item)?'❌ '+item+' avoided':'✓ '+item+' back on menu');
+}
+function addDislike(){
+  const v=document.getElementById('new-dis').value.trim().toLowerCase();
+  if(v&&!S.dislikes.includes(v)){S.dislikes.push(v);save();renderDislikes();renderHome();showToast('❌ '+v+' added');}
+  document.getElementById('new-dis').value='';
+}
+
+// ═══ PWA INSTALL ═══
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredInstall=e;
+  document.getElementById('install-area').innerHTML=
+    '<div class="install-banner"><span class="ico">📲</span>'+
+    '<div><div class="ttl">Install CoupleEats</div><div class="sub">Add to home screen — works like a real app</div></div>'+
+    '<button class="install-btn" onclick="installApp()">Install</button></div>';
+});
+function installApp(){
+  if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.then(()=>{deferredInstall=null;document.getElementById('install-area').innerHTML=''});}
+}
+
+// ═══ NAV ═══
+function showPg(name,btn){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+name).classList.add('on');
+  if(btn)btn.classList.add('on');
+  if(name==='nut')renderNut();
+  if(name==='chat')renderChat();
+  if(name==='set')renderDislikes();
+  if(name==='book')renderBook();
+  if(name==='fruit')renderFruits();
+  if(name==='swipe')initSwipe();
+}
+
+// ═══ INIT ═══
+load();
+document.getElementById('tdate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+document.getElementById('dish-count').textContent=(DB.length+S.customDishes.length);
+if(!Object.keys(S.meals).length)randomAll();
+else renderHome();
+</script>
+</body>
+</html>
